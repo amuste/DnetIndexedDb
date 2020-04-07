@@ -1,0 +1,39 @@
+$padding-sizes: 0 0, 5 5px, 7 7px, 10 10px, 15 15px, 20 20px, 25 25px, 30 30px, 35 35px, 40 40px, 45 45px, 50 50px, 60 60px, 70 70px, 75 75px, 100 100px, 200 200px, 300 300px;
+$orientation: "dnet-p" "r" "padding-right", "dnet-p" "l" "padding-left", "dnet-p" "t" "padding-top", "dnet-p" "b" "padding-bottom",
+              "dnet-m" "r" "margin-right", "dnet-m" "l" "margin-left", "dnet-m" "t" "margin-top", "dnet-m" "b" "margin-bottom";
+
+@each $orient  in $orientation{
+    @each $padding in $padding-sizes{
+     .#{nth($orient, 1)}-#{nth($orient, 2)}-#{nth($padding, 1)} {
+       #{nth($orient, 3)}: nth($padding, 2) !important;
+    }
+  }
+}
+
+$sizesValue: 30 30px, 40 40px, 50 50px, 60 60px, 65 65px, 70 70px, 80 80px, 90 90px, 100 100px, 120 120px, 150 150px,
+        200 200px, 250 250px, 300 300px, 350 350px, 400 400px, 500 500px;
+$sizes: "dnet-h" "height", "dnet-w" "width";
+
+@each $orient in $sizes{
+    @each $padding in $sizesValue{
+     .#{nth($orient, 1)}-#{nth($padding, 1)} {
+       #{nth($orient, 2)}: nth($padding, 2) !important;
+    }
+  }
+}
+
+$font-sizes-values: 8 8px, 9 9px, 10 10px, 11 11px, 12 12px, 13 13px, 14 14px, 15 15px, 17 17px, 20 20px, 25 25px, 30 30px, 35 35px, 50 50px, 60 60px, 65 65px, 70 70px, 75 75px, 90 90px, 100 100px;
+ @each $size in $font-sizes-values{
+     .#{dnet-f}-#{nth($size, 1)} {
+       font-size: nth($size, 2) !important;
+    }
+ }
+
+$orientation: "dnet-p" "padding", "dnet-m" "margin";
+@each $orient  in $orientation{
+    @each $padding in $padding-sizes{
+     .#{nth($orient, 1)}-#{nth($padding, 1)} {
+       #{nth($orient, 2)}: nth($padding, 2) !important;
+    }
+  }
+}

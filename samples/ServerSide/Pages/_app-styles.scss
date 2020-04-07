@@ -1,0 +1,52 @@
+﻿/*@import "Feature1/_feature1.scss";*/
+
+.dnet-desktop-content {
+    padding: 0;
+    flex: 1 1 0;
+
+    &.destok-layout {
+        height: calc(100vh - 25px);
+    }
+}
+
+@mixin scrollbars($size, $foreground-color, $background-color: mix($foreground-color, white, 50%)) {
+    ::-webkit-scrollbar {
+        width: $size;
+        height: $size;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: $foreground-color;
+        cursor: pointer;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: $background-color;
+    }
+    // For Internet Explorer
+    body {
+        scrollbar-face-color: $foreground-color;
+        scrollbar-track-color: $background-color;
+    }
+}
+
+@include scrollbars(.4rem, #BDBDBD, rgba(0, 0, 0, 0));
+
+.coms-input-search {
+    width: 100%;
+    border-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    background-color: #FFFFFF;
+    -webkit-transition: none;
+    transition: none;
+    box-shadow: none;
+    font-size: 12px;
+    color: #38455b;
+    border: 1px solid #eee;
+    padding: 2px 5px;
+}
+
+

@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29721.120
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DnetIndexedDbServer", "samples\ServerSide\DnetIndexedDbServer.csproj", "{11A14ACB-46CE-4741-8049-5963E4737A23}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DnetIndexedDb", "src\DnetIndexedDb\DnetIndexedDb.csproj", "{3C35A46B-4E0C-463F-A2F7-F770A20257CB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{11A14ACB-46CE-4741-8049-5963E4737A23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11A14ACB-46CE-4741-8049-5963E4737A23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11A14ACB-46CE-4741-8049-5963E4737A23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11A14ACB-46CE-4741-8049-5963E4737A23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C35A46B-4E0C-463F-A2F7-F770A20257CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C35A46B-4E0C-463F-A2F7-F770A20257CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C35A46B-4E0C-463F-A2F7-F770A20257CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C35A46B-4E0C-463F-A2F7-F770A20257CB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A42E05AE-1EB3-41AE-9A0D-F22B7C407123}
+	EndGlobalSection
+EndGlobal
