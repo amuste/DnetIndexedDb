@@ -51,9 +51,9 @@ namespace DnetIndexedDb
             return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.deleteDb", _indexedDbDatabaseModel);
         }
 
-        public async ValueTask<TEntity> AddItems<TEntity>(string objectStoreName, List<TEntity> items)
+        public async ValueTask<string> AddItems<TEntity>(string objectStoreName, List<TEntity> items)
         {
-            return await _jsRuntime.InvokeAsync<TEntity>("dnetindexeddbinterop.addItems", _indexedDbDatabaseModel, objectStoreName, items);
+            return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.addItems", _indexedDbDatabaseModel, objectStoreName, items);
         }
 
         public async ValueTask<string> UpdateItems<TEntity>(string objectStoreName, List<TEntity> items)
