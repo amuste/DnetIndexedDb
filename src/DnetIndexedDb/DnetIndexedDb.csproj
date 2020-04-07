@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <RazorLangVersion>3.0</RazorLangVersion>
     <Authors>Adrian Mustelier Camino</Authors>
-    <Company>DatalnetAdrian Mustelier Camino</Company>
+    <Company>Datalnet Adrian Mustelier Camino</Company>
     <Description>IndexedDB wrapper for Blazor</Description>
   </PropertyGroup>
 
