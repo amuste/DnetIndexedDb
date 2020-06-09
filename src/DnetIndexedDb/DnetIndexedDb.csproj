@@ -6,14 +6,21 @@
     <Authors>Adrian Mustelier Camino</Authors>
     <Company>Datalnet Adrian Mustelier Camino</Company>
     <Description>IndexedDB wrapper for Blazor</Description>
+    <PackageProjectUrl>https://github.com/amuste/DnetIndexedDb</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/amuste/DnetIndexedDb</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageTags>Blazor IndexedDB Datalnet</PackageTags>
+    <Copyright>Copyright 2020 (c) Datalnet. All rights reserved.</Copyright>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.3" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="3.1.3" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="3.1.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="3.1.5" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 

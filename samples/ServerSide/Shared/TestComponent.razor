@@ -1,0 +1,57 @@
+﻿@using System.Reflection
+@using DnetIndexedDbServer.Infrastructure.Entities
+@typeparam TItem
+
+@foreach (var propertyName in FieldsList)
+{
+    <div>
+        <input @bind="PropertyVars[propertyName]" />
+    </div>
+}
+
+<button type="button" @onclick="OnSubmit">Reset</button>
+
+@code {
+    [Parameter]
+    public TItem ItemEditModel { get; set; }
+
+    public Dictionary<string, string> PropertyVars { get; set; } = new Dictionary<string, string>();
+
+    protected override void OnInitialized()
+    {
+        foreach (var propertyName in FieldsList)
+        {
+            var propertyInfo = ItemEditModel.GetType().GetProperty(propertyName);
+            PropertyVars.Add(propertyName, propertyInfo?.GetValue(ItemEditModel).ToString());
+        }
+
+    }
+
+    public string[] FieldsList
+    {
+        get
+        {
+            return typeof(TItem).GetProperties().Select(x => x.Name).ToArray();
+        }
+    }
+
+    private void OnSubmit()
+    {
+        var tt = PropertyVars;
+
+        foreach (var propertyName in FieldsList)
+        {
+            var propertyInfo = ItemEditModel.GetType().GetProperty(propertyName);
+
+            var uu = PropertyVars[propertyName].GetType();
+
+            if (uu == propertyInfo?.PropertyType)
+            {
+                propertyInfo.SetValue(ItemEditModel, Convert.ChangeType(PropertyVars[propertyName], propertyInfo.PropertyType), null);
+            }
+
+        }
+
+        var yy = ItemEditModel;
+    }
+}
