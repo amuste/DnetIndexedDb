@@ -1,4 +1,6 @@
-# DnetIndexedDb
+
+# DnetIndexedDb (v 2.0.0-rc.1) .Net5
+
 This is a Blazor library to work with IndexedDB DOM API. It allows query multiple IndexedDb databases simultaneously 
 
 The actual API expose the following methods:
