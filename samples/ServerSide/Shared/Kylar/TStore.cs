@@ -30,7 +30,7 @@ namespace DnetIndexedDbServer.Shared.Kylar
 
                 var keyAttr = classAttrs.Select(p => p as KeyAttribute).FirstOrDefault();
 
-                if (classId.ToLower() == "Id" || keyAttr != null)
+                if (classId == "Id" || keyAttr != null)
                 {
                     _key = new IndexedDbStoreParameter
                     {
