@@ -56,31 +56,31 @@
 
         if(result != -1)
         {
-            var result1 = await GridColumnDataIndexedDb.DeleteAll("tableField");
+            var result1 = await GridColumnDataIndexedDb.DeleteAll("TableFieldDtos");
         }
 
-        var result2 = await GridColumnDataIndexedDb.AddItems<TableFieldDto>("tableField", items);
+        var result2 = await GridColumnDataIndexedDb.AddItems<TableFieldDto>("TableFieldDtos", items);
 
-        var result3 = await GridColumnDataIndexedDb.GetByKey<int, TableFieldDto>("tableField", 11);
+        var result3 = await GridColumnDataIndexedDb.GetByKey<int, TableFieldDto>("TableFieldDtos", 11);
 
-        var result4 = await GridColumnDataIndexedDb.DeleteByKey<int>("tableField", 11);
+        var result4 = await GridColumnDataIndexedDb.DeleteByKey<int>("TableFieldDtos", 11);
 
-        var result5 = await GridColumnDataIndexedDb.GetAll<TableFieldDto>("tableField");
+        var result5 = await GridColumnDataIndexedDb.GetAll<TableFieldDto>("TableFieldDtos");
 
-        var result6 = await GridColumnDataIndexedDb.GetRange<int, TableFieldDto>("tableField", 15, 20);
+        var result6 = await GridColumnDataIndexedDb.GetRange<int, TableFieldDto>("TableFieldDtos", 15, 20);
 
         foreach (var item in items)
         {
             item.FieldVisualName = item.FieldVisualName + "Updated";
         }
 
-        var result7 = await GridColumnDataIndexedDb.UpdateItems<TableFieldDto>("tableField", items);
+        var result7 = await GridColumnDataIndexedDb.UpdateItems<TableFieldDto>("TableFieldDtos", items);
 
-        var result8 = await GridColumnDataIndexedDb.GetByIndex<int, TableFieldDto>("tableField", 11, 18, "tableFieldId", true);
+        var result8 = await GridColumnDataIndexedDb.GetByIndex<int, TableFieldDto>("TableFieldDtos", 11, 18, "tableFieldId", true);
 
-        var result9 = await GridColumnDataIndexedDb.GetByIndex<int?, TableFieldDto>("tableField", 11, null, "tableFieldId", false);
+        var result9 = await GridColumnDataIndexedDb.GetByIndex<int?, TableFieldDto>("TableFieldDtos", 11, null, "tableFieldId", false);
 
-        var result10 = await GridColumnDataIndexedDb.DeleteAll("tableField");
+        var result10 = await GridColumnDataIndexedDb.DeleteAll("TableFieldDtos");
 
         var result11 = await GridColumnDataIndexedDb.DeleteIndexedDb();
     }

@@ -1,7 +1,10 @@
-﻿namespace DnetIndexedDbServer.Infrastructure.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace DnetIndexedDbServer.Infrastructure.Entities
 {
     public class TableFieldDto
     {
+        [Key]
         public int TableFieldId { get; set; }
 
         public string TableName { get; set; }

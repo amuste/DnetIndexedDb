@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using DnetIndexedDb;
 using DnetIndexedDb.Models;
 using DnetIndexedDbServer.Infrastructure;
+using DnetIndexedDbServer.Shared.Kylar;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -27,9 +28,15 @@ namespace DnetIndexedDbServer
 
             services.AddHttpClient();
 
+            //services.AddIndexedDbDatabase<GridColumnDataIndexedDb>(options =>
+            //{
+            //    options.UseDatabase(GetGridColumnDatabaseModel());
+            //});
+
+            var model = new MyIODatabase();
             services.AddIndexedDbDatabase<GridColumnDataIndexedDb>(options =>
             {
-                options.UseDatabase(GetGridColumnDatabaseModel());
+                options.UseDatabase(model);
             });
 
             services.AddIndexedDbDatabase<SecuritySuiteDataIndexedDb>(options =>
