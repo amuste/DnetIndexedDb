@@ -58,6 +58,20 @@ To create the database model use the following classes. You can find more info a
 
 See the example below
 ```CSharp
+    public class IndexedDbDatabaseModel
+    {
+      
+        public string Name { get; set; }
+     
+        public int Version { get; set; }
+      
+        public List<IndexedDbStore> Stores { get; set; } = new List<IndexedDbStore>();
+
+        public int DbModelId { get; set; }
+    }
+```
+
+```CSharp
  var indexedDbDatabaseModel = new IndexedDbDatabaseModel
             {
                 Name = "GridColumnData",
@@ -158,6 +172,71 @@ See the example below
             },
                 DbModelId = 0
             };
+```
+
+Create database model by @Kylar182
+```CSharp
+    public class TableFieldDatabase : IndexedDbDatabaseModel
+    {
+        public TableFieldDatabase()
+        {
+            Name = "GridColumnData";
+            Version = 1;
+            Stores = _stores;
+        }
+
+        /// <summary>
+        /// List of Object Stores
+        /// </summary>
+        private List<IndexedDbStore> _stores => new List<IndexedDbStore>
+        {
+            _tableFieldStore,
+        };
+
+        private IndexedDbStore _tableFieldStore => new TStore<TableFieldDto>();
+    }
+    
+    public class TStore<T> : IndexedDbStore where T : class
+    {
+        private IndexedDbStoreParameter _key;
+
+        private readonly List<IndexedDbIndex> _indexes = new List<IndexedDbIndex>();
+
+        public TStore()
+        {
+            BuildStore();
+            Name = typeof(T).Name.ToPlural();
+            Key = _key;
+            Indexes = _indexes;
+        }
+
+        private void BuildStore()
+        {
+            foreach (PropertyInfo info in typeof(T).GetProperties())
+            {
+                var classId = info.Name.Substring(info.Name.Length - 2);
+
+                var classAttrs = info.GetCustomAttributes(true);
+
+                var keyAttr = classAttrs.Select(p => p as KeyAttribute).FirstOrDefault();
+
+                if (classId == "Id" || keyAttr != null)
+                {
+                    _key = new IndexedDbStoreParameter
+                    {
+                        KeyPath = info.Name.ToCamelCase(),
+                        AutoIncrement = true
+                    };
+                }
+
+                _indexes.Add(new IndexedDbIndex
+                {
+                    Name = info.Name.ToCamelCase(),
+                    Definition = new IndexedDbIndexParameter { Unique = false }
+                });
+            }
+        }
+    }
 ```
 
 #### Step 2 - Creating a service
