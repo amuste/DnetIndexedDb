@@ -1,3 +1,7 @@
+master - .Net5 version
+
+master_net31 - 3.x version
+
 # DnetIndexedDb
 This is a Blazor library to work with IndexedDB DOM API. It allows query multiple IndexedDb databases simultaneously 
 
