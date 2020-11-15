@@ -7,9 +7,9 @@ namespace DnetIndexedDbServer.Shared.Kylar
     /// <summary>
     /// Sets which Objects will Be added to the Database
     /// </summary>
-    public class MyIODatabase : IndexedDbDatabaseModel
+    public class TableFieldDatabase : IndexedDbDatabaseModel
     {
-        public MyIODatabase()
+        public TableFieldDatabase()
         {
             Name = "GridColumnData";
             Version = 1;
@@ -21,9 +21,9 @@ namespace DnetIndexedDbServer.Shared.Kylar
         /// </summary>
         private List<IndexedDbStore> _stores => new List<IndexedDbStore>
         {
-            _transferLogStore,
+            _tableFieldStore,
         };
 
-        private IndexedDbStore _transferLogStore => new TStore<TableFieldDto>();
+        private IndexedDbStore _tableFieldStore => new TStore<TableFieldDto>();
     }
 }

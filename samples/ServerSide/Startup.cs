@@ -33,7 +33,7 @@ namespace DnetIndexedDbServer
             //    options.UseDatabase(GetGridColumnDatabaseModel());
             //});
 
-            var model = new MyIODatabase();
+            var model = new TableFieldDatabase();
             services.AddIndexedDbDatabase<GridColumnDataIndexedDb>(options =>
             {
                 options.UseDatabase(model);
