@@ -73,7 +73,8 @@ window.dnetindexeddbinterop = (function () {
                 var onSuccess = (event) => {
 
                     dbModel.instance = event.target.result;
-                    dbModels.push({ 'dbModelId': dbModelIdCount++, 'dbModel': dbModel});
+
+                    dbModels.push({ 'dbModel': dbModel});
 
                     if (isUpgradeneeded) {
                         observer.next(dbModelIdCount);
@@ -149,8 +150,15 @@ window.dnetindexeddbinterop = (function () {
             var deleteRequest = indexedDB.deleteDatabase(dbModel.name);
 
             var onSuccess = (event) => {
-                dbModel.instance = null;
+
+                let index = dbModels.findIndex(item => item.dbModelGuid === dbModel.dbModelGuid);
+
+                if (index !== -1) {
+                    dbModels.splice(index, 1);
+                };
+
                 observer.next(indexedDbMessages.DB_DELETED);
+
                 observer.complete();
             };
 
@@ -755,9 +763,9 @@ window.dnetindexeddbinterop = (function () {
     }
 
 
-    function getDbModel(dbModelId) {
+    function getDbModel(dbModelGuid) {
 
-        const dbModel = dbModels.find(element => element.dbModelId = dbModelId);
+        let dbModel = dbModels.find(element => element.dbModel.dbModelGuid === dbModelGuid);
 
         return dbModel;
     }
@@ -773,63 +781,63 @@ window.dnetindexeddbinterop = (function () {
 
         deleteDb: async function (indexedDbDatabaseModel) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelId).dbModel;
+            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await deleteDb(dbModel).pipe(Rx.operators.take(1)).toPromise();
         },
 
         addItems: async function (indexedDbDatabaseModel, objectStoreName, items) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelId).dbModel;
+            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await addItems(dbModel, objectStoreName, items).pipe(Rx.operators.take(1)).toPromise();
         },
 
         updateItems: async function (indexedDbDatabaseModel, objectStoreName, items) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelId).dbModel;
+            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await updateItems(dbModel, objectStoreName, items).pipe(Rx.operators.take(1)).toPromise();
         },
 
         getByKey: async function (indexedDbDatabaseModel, objectStoreName, key) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelId).dbModel;
+            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await getByKey(dbModel, objectStoreName, key).pipe(Rx.operators.take(1)).toPromise();
         },
 
         deleteByKey: async function (indexedDbDatabaseModel, objectStoreName, key) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelId).dbModel;
+            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await deleteByKey(dbModel, objectStoreName, key).pipe(Rx.operators.take(1)).toPromise();
         },
 
         deleteAll: async function (indexedDbDatabaseModel, objectStoreName) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelId).dbModel;
+            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
            
             return await deleteAll(dbModel, objectStoreName).pipe(Rx.operators.take(1)).toPromise();
         },
 
         getAll: async function (indexedDbDatabaseModel, objectStoreName) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelId).dbModel;
+            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await getAll(dbModel, objectStoreName).pipe(Rx.operators.take(1)).toPromise();
         },
 
         getRange: async function (indexedDbDatabaseModel, objectStoreName, lowerBound, upperBound) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelId).dbModel;
+            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await getRange(dbModel, objectStoreName, lowerBound, upperBound).pipe(Rx.operators.take(1)).toPromise();
         },
 
         getByIndex: async function (indexedDbDatabaseModel, objectStoreName, lowerBound, upperBound, dbIndex, isRange) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelId).dbModel;
+            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await getByIndex(dbModel, objectStoreName, lowerBound, upperBound, dbIndex, isRange).pipe(Rx.operators.take(1)).toPromise();
         }

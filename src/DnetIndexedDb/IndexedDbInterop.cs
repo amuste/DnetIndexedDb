@@ -30,6 +30,8 @@ namespace DnetIndexedDb
             if (option != null)
             {
                 _indexedDbDatabaseModel = option.IndexedDbDatabaseModel;
+
+                _indexedDbDatabaseModel.DbModelGuid = Guid.NewGuid().ToString();
             }
             else
             {

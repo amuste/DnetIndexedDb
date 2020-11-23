@@ -12,5 +12,7 @@ namespace DnetIndexedDb.Models
         public List<IndexedDbStore> Stores { get; set; } = new List<IndexedDbStore>();
 
         public int DbModelId { get; set; }
+
+        public string DbModelGuid { get; set; }
     }
 }

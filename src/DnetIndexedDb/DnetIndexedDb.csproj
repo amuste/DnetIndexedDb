@@ -12,8 +12,8 @@
     <PackageTags>Blazor IndexedDB Datalnet</PackageTags>
     <Copyright>Copyright 2020 (c) Datalnet. All rights reserved.</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.0.0</Version>
-    <PackageReleaseNotes>Upgrade to .Net5</PackageReleaseNotes>
+    <Version>2.0.1</Version>
+    <PackageReleaseNotes>Fixed work with several databases simultaneously</PackageReleaseNotes>
   </PropertyGroup>
 
 

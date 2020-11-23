@@ -39,9 +39,10 @@ namespace DnetIndexedDbServer
                 options.UseDatabase(model);
             });
 
+            var model1 = new SecurityDatabase();
             services.AddIndexedDbDatabase<SecuritySuiteDataIndexedDb>(options =>
             {
-                options.UseDatabase(GetSecurityDatabaseModel());
+                options.UseDatabase(model1);
             });
         }
 
