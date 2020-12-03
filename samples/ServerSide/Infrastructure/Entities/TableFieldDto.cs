@@ -5,7 +5,7 @@ namespace DnetIndexedDbServer.Infrastructure.Entities
     public class TableFieldDto
     {
         [Key]
-        public int TableFieldId { get; set; }
+        public int? TableFieldId { get; set; }
 
         public string TableName { get; set; }
 

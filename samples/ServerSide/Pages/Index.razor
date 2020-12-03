@@ -26,13 +26,151 @@
     {
         if (firstRender)
         {
-            await ExecuteIndexedDb();
+            //await InlineKeys();
+            //await InlineKeysPlusKeyGenerator();
+            //await OutOfLinekeys();
+            await InlineKeysTwoDatabases();
         }
     }
 
-    private async Task ExecuteIndexedDb()
+    //***in-line-keys (default)***
+    //KeyPath != ""
+    //KeyPath property in class has value
+    //UseKeyGenerator property in IndexedDbDatabaseModel has no meaning
+    //Use "UpdateItems" method to update items
+    private async Task InlineKeys()
     {
-        var items = GetTableFieldDtos();
+        var tableFieldService = new TableFieldService();
+
+        var itemsDb1 = tableFieldService.GetNullIdTableFields();
+
+        var db1Result = await GridColumnDataIndexedDb.OpenIndexedDb();
+
+        if (db1Result != -1)
+        {
+            var db1Result1 = await GridColumnDataIndexedDb.DeleteAll("TableFieldDtos");
+        }
+
+        var db1Result2 = await GridColumnDataIndexedDb.AddItems<TableFieldDto>("TableFieldDtos", itemsDb1);
+
+        var db1Result3 = await GridColumnDataIndexedDb.GetByKey<int, TableFieldDto>("TableFieldDtos", 11);
+
+        var db1Result4 = await GridColumnDataIndexedDb.DeleteByKey<int>("TableFieldDtos", 11);
+
+        var db1Result5 = await GridColumnDataIndexedDb.GetAll<TableFieldDto>("TableFieldDtos");
+
+        var db1Result6 = await GridColumnDataIndexedDb.GetRange<int, TableFieldDto>("TableFieldDtos", 15, 20);
+
+        foreach (var item in db1Result5)
+        {
+            item.FieldVisualName = item.FieldVisualName + "Updated";
+        }
+
+        var db1Result7a = await GridColumnDataIndexedDb.UpdateItems<TableFieldDto>("TableFieldDtos", db1Result5.ToList());
+
+        var db1Result8 = await GridColumnDataIndexedDb.GetByIndex<int, TableFieldDto>("TableFieldDtos", 11, 18, "tableFieldId", true);
+
+        var db1Result9 = await GridColumnDataIndexedDb.GetByIndex<int?, TableFieldDto>("TableFieldDtos", 11, null, "tableFieldId", false);
+
+        var db1Result10 = await GridColumnDataIndexedDb.DeleteAll("TableFieldDtos");
+
+        var db1Result11 = await GridColumnDataIndexedDb.DeleteIndexedDb();
+    }
+
+    //***in-line-keys using Key generators***
+    //KeyPath != ""
+    //KeyPath property in class equal to null
+    //UseKeyGenerator property in IndexedDbDatabaseModel set to true
+    //Use "UpdateItems" method to update items
+    private async Task InlineKeysPlusKeyGenerator()
+    {
+        var tableFieldService = new TableFieldService();
+
+        var itemsDb1 = tableFieldService.GetNullIdTableFields();
+
+        var db1Result = await GridColumnDataIndexedDb.OpenIndexedDb();
+
+        if (db1Result != -1)
+        {
+            var db1Result1 = await GridColumnDataIndexedDb.DeleteAll("TableFieldDtos");
+        }
+
+        var db1Result2 = await GridColumnDataIndexedDb.AddItems<TableFieldDto>("TableFieldDtos", itemsDb1);
+
+        var db1Result3 = await GridColumnDataIndexedDb.GetByKey<int, TableFieldDto>("TableFieldDtos", 11);
+
+        var db1Result4 = await GridColumnDataIndexedDb.DeleteByKey<int>("TableFieldDtos", 11);
+
+        var db1Result5 = await GridColumnDataIndexedDb.GetAll<TableFieldDto>("TableFieldDtos");
+
+        var db1Result6 = await GridColumnDataIndexedDb.GetRange<int, TableFieldDto>("TableFieldDtos", 15, 20);
+
+        foreach (var item in db1Result5)
+        {
+            item.FieldVisualName = item.FieldVisualName + "Updated";
+        }
+
+        var db1Result7a = await GridColumnDataIndexedDb.UpdateItems<TableFieldDto>("TableFieldDtos", db1Result5.ToList());
+
+        var db1Result8 = await GridColumnDataIndexedDb.GetByIndex<int, TableFieldDto>("TableFieldDtos", 11, 18, "tableFieldId", true);
+
+        var db1Result9 = await GridColumnDataIndexedDb.GetByIndex<int?, TableFieldDto>("TableFieldDtos", 11, null, "tableFieldId", false);
+
+        var db1Result10 = await GridColumnDataIndexedDb.DeleteAll("TableFieldDtos");
+
+        var db1Result11 = await GridColumnDataIndexedDb.DeleteIndexedDb();
+    }
+
+    //out-of-line-keys
+    //KeyPath = ""
+    //Use "UpdateItemsByKey" method to update items
+    private async Task OutOfLinekeys()
+    {
+        var tableFieldService = new TableFieldService();
+
+        var itemsDb1 = tableFieldService.GetTableFields();
+
+        var db1Result = await GridColumnDataIndexedDb.OpenIndexedDb();
+
+        if (db1Result != -1)
+        {
+            var db1Result1 = await GridColumnDataIndexedDb.DeleteAll("TableFieldDtos");
+        }
+
+        var db1Result2 = await GridColumnDataIndexedDb.AddItems<TableFieldDto>("TableFieldDtos", itemsDb1);
+
+        var db1Result3 = await GridColumnDataIndexedDb.GetByKey<int, TableFieldDto>("TableFieldDtos", 11);
+
+        var db1Result4 = await GridColumnDataIndexedDb.DeleteByKey<int>("TableFieldDtos", 11);
+
+        var db1Result5 = await GridColumnDataIndexedDb.GetAll<TableFieldDto>("TableFieldDtos");
+
+        var db1Result6 = await GridColumnDataIndexedDb.GetRange<int, TableFieldDto>("TableFieldDtos", 15, 20);
+
+        foreach (var item in db1Result5)
+        {
+            item.FieldVisualName = item.FieldVisualName + "Updated";
+        }
+
+        var db1Result7a = await GridColumnDataIndexedDb.UpdateItemsByKey<TableFieldDto>("TableFieldDtos", db1Result5.Take(3).ToList(), new List<int> { 1, 2, 3 });
+
+        var db1Result8 = await GridColumnDataIndexedDb.GetByIndex<int, TableFieldDto>("TableFieldDtos", 11, 18, "tableFieldId", true);
+
+        var db1Result9 = await GridColumnDataIndexedDb.GetByIndex<int?, TableFieldDto>("TableFieldDtos", 11, null, "tableFieldId", false);
+
+        var db1Result10 = await GridColumnDataIndexedDb.DeleteAll("TableFieldDtos");
+
+        var db1Result11 = await GridColumnDataIndexedDb.DeleteIndexedDb();
+    }
+
+    //Working with more than one Database
+    private async Task InlineKeysTwoDatabases()
+    {
+        var tableFieldService = new TableFieldService();
+
+        var itemsDb1 = tableFieldService.GetTableFields();
+
+        var itemsDb2 = tableFieldService.GetTableFields();
 
         var db1Result = await GridColumnDataIndexedDb.OpenIndexedDb();
         var db2Result = await SecuritySuiteDataIndexedDb.OpenIndexedDb();
@@ -47,8 +185,8 @@
             var db2Result1 = await SecuritySuiteDataIndexedDb.DeleteAll("TableFieldDtos");
         }
 
-        var db1Result2 = await GridColumnDataIndexedDb.AddItems<TableFieldDto>("TableFieldDtos", items);
-        var db2Result2 = await SecuritySuiteDataIndexedDb.AddItems<TableFieldDto>("TableFieldDtos", items);
+        var db1Result2 = await GridColumnDataIndexedDb.AddItems<TableFieldDto>("TableFieldDtos", itemsDb1);
+        var db2Result2 = await SecuritySuiteDataIndexedDb.AddItems<TableFieldDto>("TableFieldDtos", itemsDb2);
 
         var db1Result3 = await GridColumnDataIndexedDb.GetByKey<int, TableFieldDto>("TableFieldDtos", 11);
         var db2Result3 = await SecuritySuiteDataIndexedDb.GetByKey<int, TableFieldDto>("TableFieldDtos", 11);
@@ -62,13 +200,18 @@
         var db1Result6 = await GridColumnDataIndexedDb.GetRange<int, TableFieldDto>("TableFieldDtos", 15, 20);
         var db2Result6 = await SecuritySuiteDataIndexedDb.GetRange<int, TableFieldDto>("TableFieldDtos", 15, 20);
 
-        foreach (var item in items)
+        foreach (var item in db1Result5)
         {
             item.FieldVisualName = item.FieldVisualName + "Updated";
         }
 
-        var db1Result7 = await GridColumnDataIndexedDb.UpdateItems<TableFieldDto>("TableFieldDtos", items);
-        var db2Result7 = await SecuritySuiteDataIndexedDb.UpdateItems<TableFieldDto>("TableFieldDtos", items);
+        foreach (var item in db2Result5)
+        {
+            item.FieldVisualName = item.FieldVisualName + "Updated";
+        }
+
+        var db1Result7 = await GridColumnDataIndexedDb.UpdateItems<TableFieldDto>("TableFieldDtos", db1Result5);
+        var db2Result7 = await SecuritySuiteDataIndexedDb.UpdateItems<TableFieldDto>("TableFieldDtos", db2Result5);
 
         var db1Result8 = await GridColumnDataIndexedDb.GetByIndex<int, TableFieldDto>("TableFieldDtos", 11, 18, "tableFieldId", true);
         var db2Result8 = await SecuritySuiteDataIndexedDb.GetByIndex<int, TableFieldDto>("TableFieldDtos", 11, 18, "tableFieldId", true);
@@ -83,249 +226,8 @@
         var db2Result11 = await SecuritySuiteDataIndexedDb.DeleteIndexedDb();
     }
 
-    public List<TableFieldDto> GetTableFieldDtos()
-    {
-        var items = new List<TableFieldDto>()
-{
-            new TableFieldDto
-            {
-                TableFieldId = 11,
-                TableName = "Person",
-                FieldVisualName = "Id",
-                AttachedProperty = "Id",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-            new TableFieldDto
-            {
-                TableFieldId = 12,
-                TableName = "Person",
-                FieldVisualName = "Index",
-                AttachedProperty = "Index",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-            new TableFieldDto
-            {
-                TableFieldId = 13,
-                TableName = "Person",
-                FieldVisualName = "IsActive",
-                AttachedProperty = "IsActive",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-            new TableFieldDto
-            {
-                TableFieldId = 14,
-                TableName = "Person",
-                FieldVisualName = "Balance",
-                AttachedProperty = "Balance",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-            new TableFieldDto
-            {
-                TableFieldId = 15,
-                TableName = "Person",
-                FieldVisualName = "Picture",
-                AttachedProperty = "Picture",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-            new TableFieldDto
-            {
-                TableFieldId = 16,
-                TableName = "Person",
-                FieldVisualName = "Age",
-                AttachedProperty = "Age",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-             new TableFieldDto
-            {
-                TableFieldId = 17,
-                TableName = "Person",
-                FieldVisualName = "EyeColor",
-                AttachedProperty = "EyeColor",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-            new TableFieldDto
-            {
-                TableFieldId = 18,
-                TableName = "Person",
-                FieldVisualName = "Name",
-                AttachedProperty = "Name",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-            new TableFieldDto
-            {
-                TableFieldId = 19,
-                TableName = "Person",
-                FieldVisualName = "Gender",
-                AttachedProperty = "Gender",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-            new TableFieldDto
-            {
-                TableFieldId = 20,
-                TableName = "Person",
-                FieldVisualName = "Company",
-                AttachedProperty = "Company",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-            new TableFieldDto
-            {
-                TableFieldId = 21,
-                TableName = "Person",
-                FieldVisualName = "Email",
-                AttachedProperty = "Email",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-            new TableFieldDto
-            {
-                TableFieldId = 22,
-                TableName = "Person",
-                FieldVisualName = "Phone",
-                AttachedProperty = "Phone",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-             new TableFieldDto
-            {
-                TableFieldId = 23,
-                TableName = "Person",
-                FieldVisualName = "Address",
-                AttachedProperty = "Address",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-             new TableFieldDto
-            {
-                TableFieldId = 24,
-                TableName = "Person",
-                FieldVisualName = "Registered",
-                AttachedProperty = "Registered",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-            new TableFieldDto
-            {
-                TableFieldId = 25,
-                TableName = "Person",
-                FieldVisualName = "Latitude",
-                AttachedProperty = "Latitude",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-            new TableFieldDto
-            {
-                TableFieldId = 26,
-                TableName = "Person",
-                FieldVisualName = "Longitude",
-                AttachedProperty = "Longitude",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-            new TableFieldDto
-            {
-                TableFieldId = 27,
-                TableName = "Person",
-                FieldVisualName = "Greeting",
-                AttachedProperty = "Greeting",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            },
-            new TableFieldDto
-            {
-                TableFieldId = 28,
-                TableName = "Person",
-                FieldVisualName = "FavoriteFruit",
-                AttachedProperty = "FavoriteFruit",
-                IsLink = false,
-                MemberOf = 10,
-                Width = 200,
-                TextAlignClass = "",
-                Hide = false,
-                Type = ""
-            }
-        };
-
-        return items;
-    }
-
 }
+
+
 
 

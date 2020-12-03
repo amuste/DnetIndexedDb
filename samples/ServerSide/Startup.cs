@@ -28,16 +28,16 @@ namespace DnetIndexedDbServer
 
             services.AddHttpClient();
 
-            //services.AddIndexedDbDatabase<GridColumnDataIndexedDb>(options =>
-            //{
-            //    options.UseDatabase(GetGridColumnDatabaseModel());
-            //});
-
-            var model = new TableFieldDatabase();
             services.AddIndexedDbDatabase<GridColumnDataIndexedDb>(options =>
             {
-                options.UseDatabase(model);
+                options.UseDatabase(GetGridColumnDatabaseModel());
             });
+
+            //var model = new TableFieldDatabase();
+            //services.AddIndexedDbDatabase<GridColumnDataIndexedDb>(options =>
+            //{
+            //    options.UseDatabase(model);
+            //});
 
             var model1 = new SecurityDatabase();
             services.AddIndexedDbDatabase<SecuritySuiteDataIndexedDb>(options =>
@@ -78,17 +78,17 @@ namespace DnetIndexedDbServer
                 Name = "GridColumnData",
                 Version = 1,
                 Stores = new List<IndexedDbStore>
-        {
+                {
                 new IndexedDbStore
                 {
-                    Name = "tableField",
+                    Name = "TableFieldDtos",
                     Key = new IndexedDbStoreParameter
                     {
                         KeyPath = "tableFieldId",
                         AutoIncrement = true
                     },
                     Indexes = new List<IndexedDbIndex>
-                {
+                    {
                         new IndexedDbIndex
                         {
                             Name = "tableFieldId",
@@ -171,7 +171,8 @@ namespace DnetIndexedDbServer
                     }
                 }
             },
-                DbModelId = 0
+                DbModelId = 0,
+                UseKeyGenerator = true
             };
 
             return indexedDbDatabaseModel;
@@ -187,7 +188,7 @@ namespace DnetIndexedDbServer
         {
                 new IndexedDbStore
                 {
-                    Name = "tableField",
+                    Name = "tableFieldDtos",
                     Key = new IndexedDbStoreParameter
                     {
                         KeyPath = "tableFieldId",

@@ -74,7 +74,7 @@ window.dnetindexeddbinterop = (function () {
 
                     dbModel.instance = event.target.result;
 
-                    dbModels.push({ 'dbModel': dbModel});
+                    dbModels.push({ 'dbModel': dbModel });
 
                     if (isUpgradeneeded) {
                         observer.next(dbModelIdCount);
@@ -130,7 +130,9 @@ window.dnetindexeddbinterop = (function () {
 
         for (let store of stores) {
 
-            objectStore = newDbVersion.createObjectStore(store.name, store.key);
+            let key = store.key.keyPath === "" ? { autoIncrement: true } : store.key;
+
+            objectStore = newDbVersion.createObjectStore(store.name, key);
 
             for (index of store.indexes) {
 
@@ -201,7 +203,14 @@ window.dnetindexeddbinterop = (function () {
                 const objectStore = transaction.objectStore(objectStoreName);
 
                 const addItem = (item) => {
+
                     return new Rx.Observable((addReqObserver) => {
+
+                        let store = dbModel.stores.find(p => p.name === objectStoreName);
+
+                        let keyPath = store.key.keyPath;
+
+                        if (keyPath !== "" && item[keyPath] === null && dbModel.useKeyGenerator) delete item[keyPath];
 
                         const addRequest = objectStore.add(item);
 
@@ -275,9 +284,10 @@ window.dnetindexeddbinterop = (function () {
                 const objectStore = transaction.objectStore(objectStoreName);
 
                 const add = (item) => {
+
                     return new Rx.Observable((addReqObserver) => {
 
-                        const addRequest = objectStore.put(item);
+                        let addRequest = objectStore.put(item);
 
                         const onRequestError = (error) => {
                             addReqObserver.error(indexedDbMessages.DB_DATA_UPDATE_ERROR);
@@ -307,11 +317,89 @@ window.dnetindexeddbinterop = (function () {
                 const addRequestSubscriber = Rx.from(splitArray).pipe(
 
                     Rx.operators.concatMap((itemList) => {
+
                         return Rx.from(itemList).pipe(
+
                             Rx.operators.mergeMap((val) => {
+
                                 return add(val);
                             })
                         );
+                    })
+
+                ).subscribe(() => { }, (error) => { observer.error(error); });
+
+                return () => {
+                    transaction.removeEventListener(eventTypes.complete, onComplete);
+                    transaction.removeEventListener(eventTypes.error, onTransactionError);
+                    addRequestSubscriber.unsubscribe();
+                };
+
+            }
+        });
+    }
+
+    function updateItemsByKey(dbModel, objectStoreName, data, keys) {
+
+        return Rx.Observable.create((observer) => {
+
+            if (dbModel.instance === null) {
+
+                observer.error(indexedDbMessages.DB_CLOSE);
+
+            } else {
+
+                const transaction = dbModel.instance.transaction([objectStoreName], transactionTypes.readwrite);
+
+                const onTransactionError = (error) => {
+                    observer.error(indexedDbMessages.DB_TRANSACTION_ERROR);
+                };
+
+                const onComplete = (event) => {
+                    observer.next(indexedDbMessages.DB_DATA_UPDATED);
+                    observer.complete();
+                };
+
+                const objectStore = transaction.objectStore(objectStoreName);
+
+                const add = (item, key) => {
+
+                    return new Rx.Observable((addReqObserver) => {
+
+                        const addRequest = objectStore.put(item, key);
+
+                        const onRequestError = (error) => {
+                            addReqObserver.error(indexedDbMessages.DB_DATA_UPDATE_ERROR);
+                        };
+
+                        const onSuccess = (event) => {
+                            addReqObserver.next(event);
+                            addReqObserver.complete();
+                        };
+
+                        addRequest.addEventListener(eventTypes.success, onSuccess);
+                        addRequest.addEventListener(eventTypes.error, onRequestError);
+
+                        return () => {
+                            addRequest.removeEventListener(eventTypes.success, onSuccess);
+                            addRequest.removeEventListener(eventTypes.error, onRequestError);
+                        };
+
+                    });
+                };
+
+                transaction.addEventListener(eventTypes.error, onTransactionError);
+                transaction.addEventListener(eventTypes.complete, onComplete);
+
+                var items$ = Rx.from(data);
+                var keys$ = Rx.from(keys);
+
+                const addRequestSubscriber = Rx.zip(items$, keys$).pipe(
+
+                    Rx.operators.switchMap((values) => {
+
+                        return add(values[0], values[1]);
+
                     })
 
                 ).subscribe(() => { }, (error) => { observer.error(error); });
@@ -444,6 +532,8 @@ window.dnetindexeddbinterop = (function () {
     }
 
     function deleteAll(dbModel, objectStoreName) {
+
+        console.log('objectStoreName', objectStoreName);
 
         return Rx.Observable.create((observer) => {
 
@@ -773,7 +863,7 @@ window.dnetindexeddbinterop = (function () {
     return {
 
         openDb: async function (indexedDbDatabaseModel) {
-          
+
             var dbModelId = await open(indexedDbDatabaseModel).pipe(Rx.operators.take(1)).toPromise();
 
             return dbModelId;
@@ -800,6 +890,13 @@ window.dnetindexeddbinterop = (function () {
             return await updateItems(dbModel, objectStoreName, items).pipe(Rx.operators.take(1)).toPromise();
         },
 
+        updateItemsByKey: async function (indexedDbDatabaseModel, objectStoreName, items, keys) {
+
+            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+
+            return await updateItemsByKey(dbModel, objectStoreName, items, keys).pipe(Rx.operators.take(1)).toPromise();
+        },
+
         getByKey: async function (indexedDbDatabaseModel, objectStoreName, key) {
 
             let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
@@ -817,7 +914,7 @@ window.dnetindexeddbinterop = (function () {
         deleteAll: async function (indexedDbDatabaseModel, objectStoreName) {
 
             let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
-           
+
             return await deleteAll(dbModel, objectStoreName).pipe(Rx.operators.take(1)).toPromise();
         },
 
