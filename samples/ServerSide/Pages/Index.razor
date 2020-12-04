@@ -27,9 +27,9 @@
         if (firstRender)
         {
             //await InlineKeys();
-            //await InlineKeysPlusKeyGenerator();
+            await InlineKeysPlusKeyGenerator();
             //await OutOfLinekeys();
-            await InlineKeysTwoDatabases();
+            //await InlineKeysTwoDatabases();
         }
     }
 
@@ -42,7 +42,7 @@
     {
         var tableFieldService = new TableFieldService();
 
-        var itemsDb1 = tableFieldService.GetNullIdTableFields();
+        var itemsDb1 = tableFieldService.GetTableFields();
 
         var db1Result = await GridColumnDataIndexedDb.OpenIndexedDb();
 
@@ -86,7 +86,7 @@
     {
         var tableFieldService = new TableFieldService();
 
-        var itemsDb1 = tableFieldService.GetNullIdTableFields();
+        var itemsDb1 = tableFieldService.GetTableFields();
 
         var db1Result = await GridColumnDataIndexedDb.OpenIndexedDb();
 

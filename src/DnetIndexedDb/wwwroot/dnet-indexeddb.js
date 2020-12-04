@@ -210,7 +210,11 @@ window.dnetindexeddbinterop = (function () {
 
                         let keyPath = store.key.keyPath;
 
-                        if (keyPath !== "" && item[keyPath] === null && dbModel.useKeyGenerator) delete item[keyPath];
+                        console.log('item', item);
+
+                        if (keyPath !== "" && dbModel.useKeyGenerator) delete item[keyPath];
+
+                        console.log('newItem', item);
 
                         const addRequest = objectStore.add(item);
 
@@ -532,8 +536,6 @@ window.dnetindexeddbinterop = (function () {
     }
 
     function deleteAll(dbModel, objectStoreName) {
-
-        console.log('objectStoreName', objectStoreName);
 
         return Rx.Observable.create((observer) => {
 
