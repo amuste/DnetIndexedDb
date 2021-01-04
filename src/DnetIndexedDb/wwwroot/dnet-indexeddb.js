@@ -210,11 +210,7 @@ window.dnetindexeddbinterop = (function () {
 
                         let keyPath = store.key.keyPath;
 
-                        console.log('item', item);
-
                         if (keyPath !== "" && dbModel.useKeyGenerator) delete item[keyPath];
-
-                        console.log('newItem', item);
 
                         const addRequest = objectStore.add(item);
 
