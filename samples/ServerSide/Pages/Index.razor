@@ -26,11 +26,17 @@
     {
         if (firstRender)
         {
-            //await InlineKeys();
-            await InlineKeysPlusKeyGenerator();
+            await InlineKeys();
+            //await InlineKeysPlusKeyGenerator();
             //await OutOfLinekeys();
             //await InlineKeysTwoDatabases();
+            //await TestUpgrade();
         }
+    }
+
+    private async Task TestUpgrade()
+    {
+        var db1Result = await GridColumnDataIndexedDb.OpenIndexedDb();
     }
 
     //***in-line-keys (default)***

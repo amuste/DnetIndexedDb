@@ -68,9 +68,9 @@ window.dnetindexeddbinterop = (function () {
 
             } else {
 
-                var openRequest = indexedDB.open(dbModel.name, dbModel.version);
+                const openRequest = indexedDB.open(dbModel.name, dbModel.version);
 
-                var onSuccess = (event) => {
+                const onSuccess = (event) => {
 
                     dbModel.instance = event.target.result;
 
@@ -85,19 +85,19 @@ window.dnetindexeddbinterop = (function () {
                     observer.complete();
                 };
 
-                var onError = (err) => {
+                const onError = (err) => {
                     observer.error(indexedDbMessages.DB_OPEN_ERROR);
                 };
 
-                var onUpgradeneeded = (event) => {
+                const onUpgradeneeded = (event) => {
 
-                    var newDbVersion = event.target.result;
-                    var storeModel = dbModel.stores;
+                    const currentDbVersion = event.target.result;
+                    const storeModel = dbModel.stores;
 
                     isUpgradeneeded = true;
 
-                    var oldStores = newDbVersion.objectStoreNames;
-                    upgradeDb(newDbVersion, storeModel, oldStores);
+                    const oldStores = currentDbVersion.objectStoreNames;
+                    upgradeDb(currentDbVersion, storeModel, oldStores, event.target.transaction);
                 };
 
                 openRequest.addEventListener(eventTypes.success, onSuccess);
@@ -114,29 +114,61 @@ window.dnetindexeddbinterop = (function () {
         });
     }
 
-    function upgradeDb(newDbVersion, stores, oldStores) {
+    function upgradeDb(currentDbVersion, stores, oldStores, transaction) {
 
-        var objectStore;
+        const oldStoresArray = [...oldStores];
 
-        var index;
-        if (oldStores.length > 0) {
+        if (oldStoresArray.length > 0) {
 
-            for (index = 0; index < oldStores.length; index++) {
+            for (let store of stores) {
 
-                const name = oldStores[index];
-                newDbVersion.deleteObjectStore(name);
+                const haveThisStore = oldStoresArray.indexOf(store.name) > -1;
+
+                if (haveThisStore) {
+
+                    const objectStore = transaction.objectStore(store.name);
+
+                    const oldStoreIndexes = objectStore.indexNames;
+
+                    const oldStoreIndexesArray = [...oldStoreIndexes];
+                    const currentIndexesArray = store.indexes.map(p => p.name);
+
+                    const itemsToDeleteNames = oldStoreIndexesArray.filter(e => currentIndexesArray.indexOf(e) === -1);
+                    const itemsToAddNames = currentIndexesArray.filter(e => oldStoreIndexesArray.indexOf(e) === -1);
+
+                    for (let itemToAddName of itemsToAddNames) {
+
+                        const newIndex = store.indexes.find(p => p.name === itemToAddName);
+
+                        if (newIndex != null) objectStore.createIndex(newIndex.name, newIndex.name, newIndex.definition);
+
+                    }
+
+                    for (let itemToDeleteName of itemsToDeleteNames) {
+
+                        objectStore.deleteIndex(itemToDeleteName);
+
+                    }
+
+                } else {
+
+                    if (oldStoresArray.length > 0) currentDbVersion.deleteObjectStore(name);
+
+                }
             }
-        }
 
-        for (let store of stores) {
+        } else {
 
-            let key = store.key.keyPath === "" ? { autoIncrement: true } : store.key;
+            for (let store of stores) {
 
-            objectStore = newDbVersion.createObjectStore(store.name, key);
+                const key = store.key.keyPath === "" ? { autoIncrement: true } : store.key;
 
-            for (index of store.indexes) {
+                const objectStore = currentDbVersion.createObjectStore(store.name, key);
 
-                objectStore.createIndex(index.name, index.name, index.definition);
+                for (let index of store.indexes) {
+
+                    objectStore.createIndex(index.name, index.name, index.definition);
+                }
             }
         }
     }
@@ -153,7 +185,7 @@ window.dnetindexeddbinterop = (function () {
 
             var onSuccess = (event) => {
 
-                let index = dbModels.findIndex(item => item.dbModelGuid === dbModel.dbModelGuid);
+                const index = dbModels.findIndex(item => item.dbModelGuid === dbModel.dbModelGuid);
 
                 if (index !== -1) {
                     dbModels.splice(index, 1);
@@ -206,9 +238,9 @@ window.dnetindexeddbinterop = (function () {
 
                     return new Rx.Observable((addReqObserver) => {
 
-                        let store = dbModel.stores.find(p => p.name === objectStoreName);
+                        const store = dbModel.stores.find(p => p.name === objectStoreName);
 
-                        let keyPath = store.key.keyPath;
+                        const keyPath = store.key.keyPath;
 
                         if (keyPath !== "" && dbModel.useKeyGenerator) delete item[keyPath];
 
@@ -287,7 +319,7 @@ window.dnetindexeddbinterop = (function () {
 
                     return new Rx.Observable((addReqObserver) => {
 
-                        let addRequest = objectStore.put(item);
+                        const addRequest = objectStore.put(item);
 
                         const onRequestError = (error) => {
                             addReqObserver.error(indexedDbMessages.DB_DATA_UPDATE_ERROR);
@@ -391,8 +423,8 @@ window.dnetindexeddbinterop = (function () {
                 transaction.addEventListener(eventTypes.error, onTransactionError);
                 transaction.addEventListener(eventTypes.complete, onComplete);
 
-                var items$ = Rx.from(data);
-                var keys$ = Rx.from(keys);
+                const items$ = Rx.from(data);
+                const keys$ = Rx.from(keys);
 
                 const addRequestSubscriber = Rx.zip(items$, keys$).pipe(
 
@@ -632,8 +664,8 @@ window.dnetindexeddbinterop = (function () {
                     });
                 };
 
-                let objects = [];
-                const getAll = (count) => {
+                const objects = [];
+                const getAllLocal = (count) => {
                     return new Rx.Observable((cursorObserver) => {
 
                         const cursorRequest = objectStore.openCursor();
@@ -644,11 +676,11 @@ window.dnetindexeddbinterop = (function () {
 
                         const onSuccess = (event) => {
 
-                            let result = event.target.result;
+                            const result = event.target.result;
 
                             if (result !== null) {
 
-                                let item = result.value;
+                                const item = result.value;
                                 objects.push(item);
 
                                 if (objects.length === count) {
@@ -679,7 +711,7 @@ window.dnetindexeddbinterop = (function () {
                 const getAllSubscriber = objectCount().pipe(
 
                     Rx.operators.mergeMap((count) => {
-                        return getAll(count);
+                        return getAllLocal(count);
                     })
 
                 ).subscribe((data) => {
@@ -714,12 +746,12 @@ window.dnetindexeddbinterop = (function () {
 
                 const objectStore = transaction.objectStore(objectStoreName);
 
-                let objects = [];
+                const objects = [];
 
-                const getRange = () => {
+                const getRangeLocal = () => {
                     return new Rx.Observable((cursorObserver) => {
 
-                        let boundedKeyRange = IDBKeyRange.bound(lowerBound, upperBound, false, false);
+                        const boundedKeyRange = IDBKeyRange.bound(lowerBound, upperBound, false, false);
                         const cursorRequest = objectStore.openCursor(boundedKeyRange);
 
                         const onRequestError = (error) => {
@@ -728,11 +760,11 @@ window.dnetindexeddbinterop = (function () {
 
                         const onSuccess = (event) => {
 
-                            let result = event.target.result;
+                            const result = event.target.result;
 
                             if (result !== null) {
 
-                                let item = result.value;
+                                const item = result.value;
                                 objects.push(item);
                                 result.continue();
 
@@ -755,7 +787,7 @@ window.dnetindexeddbinterop = (function () {
 
                 transaction.addEventListener(eventTypes.success, onTransactionError);
 
-                const getRangeSubscriber = getRange().subscribe((data) => {
+                const getRangeSubscriber = getRangeLocal().subscribe((data) => {
                     observer.next(data);
                     observer.complete();
                 }, (error) => { observer.error(error); });
@@ -785,7 +817,7 @@ window.dnetindexeddbinterop = (function () {
 
                 const objectStore = transaction.objectStore(objectStoreName);
 
-                let objects = [];
+                const objects = [];
 
                 const getRangeByIndex = () => {
 
@@ -810,7 +842,7 @@ window.dnetindexeddbinterop = (function () {
 
                         const onSuccess = (event) => {
 
-                            let result = event.target.result;
+                            const result = event.target.result;
 
                             if (result !== null) {
 
@@ -853,7 +885,7 @@ window.dnetindexeddbinterop = (function () {
 
     function getDbModel(dbModelGuid) {
 
-        let dbModel = dbModels.find(element => element.dbModel.dbModelGuid === dbModelGuid);
+        const dbModel = dbModels.find(element => element.dbModel.dbModelGuid === dbModelGuid);
 
         return dbModel;
     }
@@ -862,77 +894,77 @@ window.dnetindexeddbinterop = (function () {
 
         openDb: async function (indexedDbDatabaseModel) {
 
-            var dbModelId = await open(indexedDbDatabaseModel).pipe(Rx.operators.take(1)).toPromise();
+            const dbModelId = await open(indexedDbDatabaseModel).pipe(Rx.operators.take(1)).toPromise();
 
             return dbModelId;
         },
 
         deleteDb: async function (indexedDbDatabaseModel) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await deleteDb(dbModel).pipe(Rx.operators.take(1)).toPromise();
         },
 
         addItems: async function (indexedDbDatabaseModel, objectStoreName, items) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await addItems(dbModel, objectStoreName, items).pipe(Rx.operators.take(1)).toPromise();
         },
 
         updateItems: async function (indexedDbDatabaseModel, objectStoreName, items) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await updateItems(dbModel, objectStoreName, items).pipe(Rx.operators.take(1)).toPromise();
         },
 
         updateItemsByKey: async function (indexedDbDatabaseModel, objectStoreName, items, keys) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await updateItemsByKey(dbModel, objectStoreName, items, keys).pipe(Rx.operators.take(1)).toPromise();
         },
 
         getByKey: async function (indexedDbDatabaseModel, objectStoreName, key) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await getByKey(dbModel, objectStoreName, key).pipe(Rx.operators.take(1)).toPromise();
         },
 
         deleteByKey: async function (indexedDbDatabaseModel, objectStoreName, key) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await deleteByKey(dbModel, objectStoreName, key).pipe(Rx.operators.take(1)).toPromise();
         },
 
         deleteAll: async function (indexedDbDatabaseModel, objectStoreName) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await deleteAll(dbModel, objectStoreName).pipe(Rx.operators.take(1)).toPromise();
         },
 
         getAll: async function (indexedDbDatabaseModel, objectStoreName) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await getAll(dbModel, objectStoreName).pipe(Rx.operators.take(1)).toPromise();
         },
 
         getRange: async function (indexedDbDatabaseModel, objectStoreName, lowerBound, upperBound) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await getRange(dbModel, objectStoreName, lowerBound, upperBound).pipe(Rx.operators.take(1)).toPromise();
         },
 
         getByIndex: async function (indexedDbDatabaseModel, objectStoreName, lowerBound, upperBound, dbIndex, isRange) {
 
-            let dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await getByIndex(dbModel, objectStoreName, lowerBound, upperBound, dbIndex, isRange).pipe(Rx.operators.take(1)).toPromise();
         }

@@ -167,7 +167,15 @@ namespace DnetIndexedDbServer
                             {
                                 Unique = false
                             }
-                        }
+                        },
+                        //new IndexedDbIndex
+                        //{
+                        //    Name = "TestParam",
+                        //    Definition = new IndexedDbIndexParameter
+                        //    {
+                        //        Unique = false
+                        //    }
+                        //}
                     }
                 }
             },
