@@ -12,8 +12,8 @@
     <PackageTags>Blazor IndexedDB Datalnet</PackageTags>
     <Copyright>Copyright 2020 (c) Datalnet. All rights reserved.</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.1.1</Version>
-    <PackageReleaseNotes>Fix in-line-keys. Not need to send null in key property when using in-line-keys with Key generator</PackageReleaseNotes>
+    <Version>2.2.1</Version>
+    <PackageReleaseNotes>Fix New Database Version Wipes the database. Issue #13</PackageReleaseNotes>
   </PropertyGroup>
 
 
