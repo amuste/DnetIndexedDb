@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DnetIndexedDb;
+using DnetIndexedDb.Fluent;
 using DnetIndexedDb.Models;
 using DnetIndexedDbServer.Infrastructure;
 using DnetIndexedDbServer.Shared.Kylar;
@@ -290,6 +291,29 @@ namespace DnetIndexedDbServer
             };
 
             return indexedDbDatabaseModel;
+        }
+
+        private IndexedDbDatabaseModel GetSecurityDatabaseModelFluent()
+        {
+            var model = new IndexedDbDatabaseModel()
+                .WithName("Security")
+                .WithVersion(1)
+                .WithModelId(0);
+
+            model.AddStore("tableFieldDtos")
+                .WithAutoIncrementingKey("tableFieldId")
+                .AddUniqueIndex("tableFieldId")
+                .AddIndex("attachedProperty")
+                .AddIndex("fieldVisualName")
+                .AddIndex("hide")
+                .AddIndex("isLink")
+                .AddIndex("memberOf")
+                .AddIndex("tableName")
+                .AddIndex("textAlignClass")
+                .AddIndex("type")
+                .AddIndex("width");           
+
+            return model;
         }
 
 
