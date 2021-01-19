@@ -72,6 +72,11 @@
             item.FieldVisualName = item.FieldVisualName + "Updated";
         }
 
+        var keyMax = await GridColumnDataIndexedDb.GetMaxKey<int>("TableFieldDtos");
+        var keyMin = await GridColumnDataIndexedDb.GetMinKey<int>("TableFieldDtos");
+        var indexMax = await GridColumnDataIndexedDb.GetMaxIndex<string>("TableFieldDtos", "attachedProperty");
+        var indexMin = await GridColumnDataIndexedDb.GetMinIndex<string>("TableFieldDtos", "attachedProperty");
+
         var db1Result7a = await GridColumnDataIndexedDb.UpdateItems<TableFieldDto>("TableFieldDtos", db1Result5.ToList());
 
         var db1Result8 = await GridColumnDataIndexedDb.GetByIndex<int, TableFieldDto>("TableFieldDtos", 11, 18, "tableFieldId", true);
