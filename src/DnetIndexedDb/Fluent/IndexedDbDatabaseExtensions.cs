@@ -5,25 +5,48 @@ namespace DnetIndexedDb.Fluent
 {
     public static class IndexedDbDatabaseExtensions
     {
+        /// <summary>
+        /// Sets Name of Database Model
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static IndexedDbDatabaseModel WithName(this IndexedDbDatabaseModel model, string name)
         {
             model.Name = name;
             return model;
         }
 
+        /// <summary>
+        /// Sets Version of Database Model
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="version"></param>
+        /// <returns></returns>
         public static IndexedDbDatabaseModel WithVersion(this IndexedDbDatabaseModel model, int version)
         {
             model.Version = version;
             return model;
         }
 
+        /// <summary>
+        /// Sets Database ModelId. Defaults to 0
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static IndexedDbDatabaseModel WithModelId(this IndexedDbDatabaseModel model, int id)
         {
             model.DbModelId = id;
             return model;
         }
 
-
+        /// <summary>
+        /// Creates a new IndexedDbStore and adds it to the Database Model
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static IndexedDbStore AddStore(this IndexedDbDatabaseModel model, string name)
         {
             if (model.Stores == null)
