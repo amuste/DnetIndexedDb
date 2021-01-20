@@ -97,5 +97,51 @@ namespace DnetIndexedDb
         {
             return await _jsRuntime.InvokeAsync<List<TEntity>>("dnetindexeddbinterop.getByIndex", _indexedDbDatabaseModel, objectStoreName, lowerBound, upperBound, dbIndex, isRange);
         }
+
+        /// <summary>
+        /// Returns the max value in the given data store's index
+        /// </summary>
+        /// <typeparam name="TIndex"></typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <param name="dbIndex"></param>
+        /// <returns></returns>
+        public async ValueTask<TIndex> GetMaxIndex<TIndex>(string objectStoreName, string dbIndex)
+        {
+            return await _jsRuntime.InvokeAsync<TIndex>("dnetindexeddbinterop.getMaxIndex", _indexedDbDatabaseModel, objectStoreName, dbIndex);
+        }
+
+        /// <summary>
+        /// Returns the max value in the given data store's key
+        /// </summary>
+        /// <typeparam name="TIndex"></typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <returns></returns>
+        public async ValueTask<TKey> GetMaxKey<TKey>(string objectStoreName)
+        {
+            return await _jsRuntime.InvokeAsync<TKey>("dnetindexeddbinterop.getMaxKey", _indexedDbDatabaseModel, objectStoreName);
+        }
+
+        /// <summary>
+        /// Returns the minimum value in the given data store's index 
+        /// </summary>
+        /// <typeparam name="TIndex"></typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <param name="dbIndex"></param>
+        /// <returns></returns>
+        public async ValueTask<TIndex> GetMinIndex<TIndex>(string objectStoreName, string dbIndex)
+        {
+            return await _jsRuntime.InvokeAsync<TIndex>("dnetindexeddbinterop.getMinIndex", _indexedDbDatabaseModel, objectStoreName, dbIndex);
+        }
+
+        /// <summary>
+        /// Returns the minimum value in the given data store's key 
+        /// </summary>
+        /// <typeparam name="TIndex"></typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <returns></returns>
+        public async ValueTask<TKey> GetMinKey<TKey>(string objectStoreName)
+        {
+            return await _jsRuntime.InvokeAsync<TKey>("dnetindexeddbinterop.getMinKey", _indexedDbDatabaseModel, objectStoreName);
+        }
     }
 }
