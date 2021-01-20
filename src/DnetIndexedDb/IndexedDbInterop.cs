@@ -39,6 +39,10 @@ namespace DnetIndexedDb
             }
         }
 
+        /// <summary>
+        /// Create, Open or Upgrade IndexedDb Database
+        /// </summary>
+        /// <returns></returns>
         public async ValueTask<int> OpenIndexedDb()
         {
             var dbModelId = await _jsRuntime.InvokeAsync<int>("dnetindexeddbinterop.openDb", _indexedDbDatabaseModel);
@@ -48,51 +52,123 @@ namespace DnetIndexedDb
             return dbModelId;
         }
 
+        /// <summary>
+        /// Delete IndexedDb Database
+        /// </summary>
+        /// <returns></returns>
         public async ValueTask<string> DeleteIndexedDb()
         {
             return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.deleteDb", _indexedDbDatabaseModel);
         }
 
+        /// <summary>
+        /// Add records to a given data store
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <param name="items"></param>
+        /// <returns></returns>
         public async ValueTask<string> AddItems<TEntity>(string objectStoreName, List<TEntity> items)
         {
             return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.addItems", _indexedDbDatabaseModel, objectStoreName, items);
         }
 
+        /// <summary>
+        /// Update records in a given data store
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <param name="items"></param>
+        /// <returns></returns>
         public async ValueTask<string> UpdateItems<TEntity>(string objectStoreName, List<TEntity> items)
         {
             return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.updateItems", _indexedDbDatabaseModel, objectStoreName, items);
         }
 
+        /// <summary>
+        /// Update records in a given data store by keys
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <param name="items"></param>
+        /// <param name="keys"></param>
+        /// <returns></returns>
         public async ValueTask<string> UpdateItemsByKey<TEntity>(string objectStoreName, List<TEntity> items, List<int> keys)
         {
             return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.updateItemsByKey", _indexedDbDatabaseModel, objectStoreName, items, keys);
         }
 
+        /// <summary>
+        /// Return a record in a given data store by its key
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="key"></param>
+        /// <param name="objectStoreName"></param>
+        /// <returns></returns>
         public async ValueTask<TEntity> GetByKey<TKey, TEntity>(string objectStoreName, TKey key)
         {
             return await _jsRuntime.InvokeAsync<TEntity>("dnetindexeddbinterop.getByKey", _indexedDbDatabaseModel, objectStoreName, key);
         }
 
+        /// <summary>
+        /// Delete a record in a given data store by its key
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="key"></param>
+        /// <param name="objectStoreName"></param>
+        /// <returns></returns>
         public async ValueTask<string> DeleteByKey<TKey>(string objectStoreName, TKey key)
         {
             return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.deleteByKey", _indexedDbDatabaseModel, objectStoreName, key);
         }
 
+        /// <summary>
+        /// Delete all records in a given data store
+        /// </summary>
+        /// <param name="objectStoreName"></param>
+        /// <returns></returns>
         public async ValueTask<string> DeleteAll(string objectStoreName)
         {
             return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.deleteAll", _indexedDbDatabaseModel, objectStoreName);
         }
 
+        /// <summary>
+        /// Return all records in a given data store
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <returns></returns>
         public async ValueTask<List<TEntity>> GetAll<TEntity>(string objectStoreName)
         {
             return await _jsRuntime.InvokeAsync<List<TEntity>>("dnetindexeddbinterop.getAll", _indexedDbDatabaseModel, objectStoreName);
         }
 
+        /// <summary>
+        /// Return some records in a given data store by key
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <param name="lowerBound"></param>
+        /// <param name="upperBound"></param>
+        /// <returns></returns>
         public async ValueTask<List<TEntity>> GetRange<TKey, TEntity>(string objectStoreName, TKey lowerBound, TKey upperBound)
         {
             return await _jsRuntime.InvokeAsync<List<TEntity>>("dnetindexeddbinterop.getRange", _indexedDbDatabaseModel, objectStoreName, lowerBound, upperBound);
         }
 
+        /// <summary>
+        /// Return some records in a given data store by index
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <param name="lowerBound"></param>
+        /// <param name="upperBound"></param>
+        /// <param name="dbIndex"></param>
+        /// <param name="isRange"></param>
+        /// <returns></returns>
         public async ValueTask<List<TEntity>> GetByIndex<TKey, TEntity>(string objectStoreName, TKey lowerBound, TKey upperBound, string dbIndex, bool isRange)
         {
             return await _jsRuntime.InvokeAsync<List<TEntity>>("dnetindexeddbinterop.getByIndex", _indexedDbDatabaseModel, objectStoreName, lowerBound, upperBound, dbIndex, isRange);
@@ -113,7 +189,7 @@ namespace DnetIndexedDb
         /// <summary>
         /// Returns the max value in the given data store's key
         /// </summary>
-        /// <typeparam name="TIndex"></typeparam>
+        /// <typeparam name="TKey"></typeparam>
         /// <param name="objectStoreName"></param>
         /// <returns></returns>
         public async ValueTask<TKey> GetMaxKey<TKey>(string objectStoreName)
@@ -136,7 +212,7 @@ namespace DnetIndexedDb
         /// <summary>
         /// Returns the minimum value in the given data store's key 
         /// </summary>
-        /// <typeparam name="TIndex"></typeparam>
+        /// <typeparam name="TKey"></typeparam>
         /// <param name="objectStoreName"></param>
         /// <returns></returns>
         public async ValueTask<TKey> GetMinKey<TKey>(string objectStoreName)
