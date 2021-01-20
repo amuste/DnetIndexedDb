@@ -60,7 +60,7 @@ To create the database model use the following classes. You can find more info a
 ```IndexedDbStore```
 ```IndexedDbStoreParameter```
 
-See the example below
+See the examples below:
 ```CSharp
     public class IndexedDbDatabaseModel
     {
@@ -178,7 +178,8 @@ See the example below
             };
 ```
 
-Create database model by @Kylar182
+##### Create database model by @Kylar182
+
 ```CSharp
     public class TableFieldDatabase : IndexedDbDatabaseModel
     {
@@ -241,6 +242,35 @@ Create database model by @Kylar182
             }
         }
     }
+```
+
+##### Fluent DbModel Definition
+
+```CSharp
+using DnetIndexedDb.Fluent;
+...
+    services.AddIndexedDbDatabase<SecuritySuiteDataIndexedDb>(options =>
+    {
+        var model = new IndexedDbDatabaseModel()
+            .WithName("Security")
+            .WithVersion(1)
+            .WithModelId(0);
+
+        model.AddStore("tableFieldDtos")
+            .WithAutoIncrementingKey("tableFieldId")
+            .AddUniqueIndex("tableFieldId")
+            .AddIndex("attachedProperty")
+            .AddIndex("fieldVisualName")
+            .AddIndex("hide")
+            .AddIndex("isLink")
+            .AddIndex("memberOf")
+            .AddIndex("tableName")
+            .AddIndex("textAlignClass")
+            .AddIndex("type")
+            .AddIndex("width");
+
+        options.UseDatabase(model);
+    });
 ```
 
 #### Step 2 - Creating a service
