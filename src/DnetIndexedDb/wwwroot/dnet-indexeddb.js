@@ -38,8 +38,8 @@ window.dnetindexeddbinterop = (function () {
     };
 
     const extentTypes = {
-        max: "prev",
-        min: "next"
+        Max: "prev",
+        Min: "next"
     }
 
     var Rx = window['rxjs'];
@@ -922,7 +922,12 @@ window.dnetindexeddbinterop = (function () {
                         };
 
                         const onSuccess = (event) => {
-                            getReqObserver.next(cursorRequest.result.key);
+                            if (cursorRequest.result) {
+                                getReqObserver.next(cursorRequest.result.key);
+                            } else {
+                                getReqObserver.next(null);
+                            }
+
                             getReqObserver.complete();
                         };
 
@@ -1039,32 +1044,11 @@ window.dnetindexeddbinterop = (function () {
             return await getByIndex(dbModel, objectStoreName, lowerBound, upperBound, dbIndex, isRange).pipe(Rx.operators.take(1)).toPromise();
         },
 
-        getMaxIndex: async function (indexedDbDatabaseModel, objectStoreName, dbIndex) {
+        getExtent: async function (indexedDbDatabaseModel, objectStoreName, dbIndex, extentType) {
 
             const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
-            return await getExtent(dbModel, objectStoreName, dbIndex, extentTypes.max).pipe(Rx.operators.take(1)).toPromise();
-        },
-
-        getMinIndex: async function (indexedDbDatabaseModel, objectStoreName, dbIndex) {
-
-            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
-
-            return await getExtent(dbModel, objectStoreName, dbIndex, extentTypes.min).pipe(Rx.operators.take(1)).toPromise();
-        },
-
-        getMaxKey: async function (indexedDbDatabaseModel, objectStoreName) {
-
-            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
-
-            return await getExtent(dbModel, objectStoreName, null, extentTypes.max).pipe(Rx.operators.take(1)).toPromise();
-        },
-
-        getMinKey: async function (indexedDbDatabaseModel, objectStoreName) {
-
-            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
-
-            return await getExtent(dbModel, objectStoreName, null, extentTypes.min).pipe(Rx.operators.take(1)).toPromise();
+            return await getExtent(dbModel, objectStoreName, dbIndex, extentTypes[extentType]).pipe(Rx.operators.take(1)).toPromise();
         }
 
     };
