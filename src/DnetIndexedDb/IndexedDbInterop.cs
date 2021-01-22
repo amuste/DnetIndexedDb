@@ -225,14 +225,13 @@ namespace DnetIndexedDb
         {
             var result = await _jsRuntime.InvokeAsync<JsonElement>("dnetindexeddbinterop.getExtent", _indexedDbDatabaseModel, objectStoreName, dbIndex, extentType);
 
-            var resultJson = result.GetRawText();
-            if (resultJson == "null")
+            if (result.ValueKind == JsonValueKind.Null)
             {
                 return default;
             }
             else
             {
-                return JsonSerializer.Deserialize<T>(resultJson);
+                return JsonSerializer.Deserialize<T>(result.GetRawText());
             }
         }
     }
