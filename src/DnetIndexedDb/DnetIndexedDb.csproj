@@ -12,8 +12,9 @@
     <PackageTags>Blazor IndexedDB Datalnet</PackageTags>
     <Copyright>Copyright 2020 (c) Datalnet. All rights reserved.</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.2.1</Version>
-    <PackageReleaseNotes>Fix New Database Version Wipes the database. Issue #13</PackageReleaseNotes>
+    <Version>2.3.0</Version>
+    <PackageReleaseNotes>Fluent Extensions for Database Creation
+Add Min/Max Extent Searching for Key and Index Fields</PackageReleaseNotes>
   </PropertyGroup>
 
 
