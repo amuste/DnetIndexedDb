@@ -3,6 +3,7 @@ using DnetIndexedDb;
 using DnetIndexedDb.Fluent;
 using DnetIndexedDb.Models;
 using DnetIndexedDbServer.Infrastructure;
+using DnetIndexedDbServer.Infrastructure.Entities;
 using DnetIndexedDbServer.Shared.Kylar;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,11 +35,16 @@ namespace DnetIndexedDbServer
                 options.UseDatabase(GetGridColumnDatabaseModel());
             });
 
-            //var model = new TableFieldDatabase();
-            //services.AddIndexedDbDatabase<GridColumnDataIndexedDb>(options =>
-            //{
-            //    options.UseDatabase(model);
-            //});
+            services.AddIndexedDbDatabase<GridColumnDataIndexedDb2>(options =>
+            {
+                var indexedDbDatabaseModel = new IndexedDbDatabaseModel()
+                    .WithName("TestAttributes")
+                    .WithVersion(1);
+
+                indexedDbDatabaseModel.AddStore<TableFieldDto>();
+
+                options.UseDatabase(indexedDbDatabaseModel);
+            });
 
             var model1 = new SecurityDatabase();
             services.AddIndexedDbDatabase<SecuritySuiteDataIndexedDb>(options =>
@@ -54,7 +60,7 @@ namespace DnetIndexedDbServer
                 app.UseDeveloperExceptionPage();
             }
             else
-            {  
+            {
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
@@ -70,6 +76,15 @@ namespace DnetIndexedDbServer
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
+        }
+
+        private IndexedDbDatabaseModel GetGridColumnDatabaseModelAttributeBased()
+        {
+            var indexedDbDatabaseModel = new IndexedDbDatabaseModel();
+
+            indexedDbDatabaseModel.AddStore<TableFieldDto>();
+
+            return indexedDbDatabaseModel;
         }
 
         private IndexedDbDatabaseModel GetGridColumnDatabaseModel()
@@ -311,7 +326,7 @@ namespace DnetIndexedDbServer
                 .AddIndex("tableName")
                 .AddIndex("textAlignClass")
                 .AddIndex("type")
-                .AddIndex("width");           
+                .AddIndex("width");
 
             return model;
         }
