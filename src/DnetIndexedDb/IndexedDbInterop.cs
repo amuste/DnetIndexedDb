@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.JSInterop;
 using System.Threading.Tasks;
 using DnetIndexedDb.Models;
+using System.Text.Json;
 
 namespace DnetIndexedDb
 {
@@ -183,7 +184,7 @@ namespace DnetIndexedDb
         /// <returns></returns>
         public async ValueTask<TIndex> GetMaxIndex<TIndex>(string objectStoreName, string dbIndex)
         {
-            return await _jsRuntime.InvokeAsync<TIndex>("dnetindexeddbinterop.getMaxIndex", _indexedDbDatabaseModel, objectStoreName, dbIndex);
+            return await GetExtent<TIndex>(objectStoreName, dbIndex, "Max");
         }
 
         /// <summary>
@@ -194,7 +195,7 @@ namespace DnetIndexedDb
         /// <returns></returns>
         public async ValueTask<TKey> GetMaxKey<TKey>(string objectStoreName)
         {
-            return await _jsRuntime.InvokeAsync<TKey>("dnetindexeddbinterop.getMaxKey", _indexedDbDatabaseModel, objectStoreName);
+            return await GetExtent<TKey>(objectStoreName, null, "Max");
         }
 
         /// <summary>
@@ -206,7 +207,7 @@ namespace DnetIndexedDb
         /// <returns></returns>
         public async ValueTask<TIndex> GetMinIndex<TIndex>(string objectStoreName, string dbIndex)
         {
-            return await _jsRuntime.InvokeAsync<TIndex>("dnetindexeddbinterop.getMinIndex", _indexedDbDatabaseModel, objectStoreName, dbIndex);
+            return await GetExtent<TIndex>(objectStoreName, dbIndex, "Min");
         }
 
         /// <summary>
@@ -217,7 +218,21 @@ namespace DnetIndexedDb
         /// <returns></returns>
         public async ValueTask<TKey> GetMinKey<TKey>(string objectStoreName)
         {
-            return await _jsRuntime.InvokeAsync<TKey>("dnetindexeddbinterop.getMinKey", _indexedDbDatabaseModel, objectStoreName);
+            return await GetExtent<TKey>(objectStoreName, null, "Min");
+        }
+
+        private async ValueTask<T> GetExtent<T>(string objectStoreName, string dbIndex, string extentType)
+        {
+            var result = await _jsRuntime.InvokeAsync<JsonElement>("dnetindexeddbinterop.getExtent", _indexedDbDatabaseModel, objectStoreName, dbIndex, extentType);
+
+            if (result.ValueKind == JsonValueKind.Null)
+            {
+                return default;
+            }
+            else
+            {
+                return JsonSerializer.Deserialize<T>(result.GetRawText());
+            }
         }
     }
 }
