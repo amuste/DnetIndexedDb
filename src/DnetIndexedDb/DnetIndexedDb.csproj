@@ -17,6 +17,10 @@
 Add Min/Max Extent Searching for Key and Index Fields</PackageReleaseNotes>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>D:\Projects\DnetIndexedDb\src\DnetIndexedDb\DnetIndexedDb.xml</DocumentationFile>
+  </PropertyGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.0" />
