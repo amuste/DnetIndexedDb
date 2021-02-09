@@ -125,6 +125,9 @@ window.dnetindexeddbinterop = (function () {
 
         if (oldStoresArray.length > 0) {
 
+            /* Check every current store against the old version. If it is not in the old version, create the store.
+             * If it exists in the old, add or delete indexes where necessary.
+             */
             for (let store of stores) {
 
                 const haveThisStore = oldStoresArray.indexOf(store.name) > -1;
@@ -156,25 +159,42 @@ window.dnetindexeddbinterop = (function () {
                     }
 
                 } else {
-
-                    if (oldStoresArray.length > 0) currentDbVersion.deleteObjectStore(name);
-
+                    createStore(currentDbVersion, store);
                 }
+            }
+
+            /* Check every old store against the current version. If it is not in the current version, delete the old store.
+             * This is necessary as old stores appear to remain even if they are not anymore defined in the current version.
+             */
+            const currentStoreNames = stores.map(p => p.name);
+
+            for (let oldStore of oldStoresArray) {
+
+                const notInCurrentVersion = currentStoreNames.indexOf(oldStore) == -1;
+
+                if (notInCurrentVersion) {
+                    currentDbVersion.deleteObjectStore(oldStore);
+                }
+
             }
 
         } else {
 
             for (let store of stores) {
-
-                const key = store.key.keyPath === "" ? { autoIncrement: true } : store.key;
-
-                const objectStore = currentDbVersion.createObjectStore(store.name, key);
-
-                for (let index of store.indexes) {
-
-                    objectStore.createIndex(index.name, index.name, index.definition);
-                }
+                createStore(currentDbVersion, store);
             }
+        }
+    }
+
+    function createStore(currentDbVersion, store) {
+
+        const key = store.key.keyPath === "" ? { autoIncrement: true } : store.key;
+
+        const objectStore = currentDbVersion.createObjectStore(store.name, key);
+
+        for (let index of store.indexes) {
+
+            objectStore.createIndex(index.name, index.name, index.definition);
         }
     }
 
