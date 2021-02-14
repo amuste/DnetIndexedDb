@@ -38,8 +38,8 @@ window.dnetindexeddbinterop = (function () {
     };
 
     const extentTypes = {
-        max: "prev",
-        min: "next"
+        Max: "prev",
+        Min: "next"
     }
 
     var Rx = window['rxjs'];
@@ -125,6 +125,9 @@ window.dnetindexeddbinterop = (function () {
 
         if (oldStoresArray.length > 0) {
 
+            /* Check every current store against the old version. If it is not in the old version, create the store.
+             * If it exists in the old, add or delete indexes where necessary.
+             */
             for (let store of stores) {
 
                 const haveThisStore = oldStoresArray.indexOf(store.name) > -1;
@@ -156,25 +159,42 @@ window.dnetindexeddbinterop = (function () {
                     }
 
                 } else {
-
-                    if (oldStoresArray.length > 0) currentDbVersion.deleteObjectStore(name);
-
+                    createStore(currentDbVersion, store);
                 }
+            }
+
+            /* Check every old store against the current version. If it is not in the current version, delete the old store.
+             * This is necessary as old stores appear to remain even if they are not anymore defined in the current version.
+             */
+            const currentStoreNames = stores.map(p => p.name);
+
+            for (let oldStore of oldStoresArray) {
+
+                const notInCurrentVersion = currentStoreNames.indexOf(oldStore) == -1;
+
+                if (notInCurrentVersion) {
+                    currentDbVersion.deleteObjectStore(oldStore);
+                }
+
             }
 
         } else {
 
             for (let store of stores) {
-
-                const key = store.key.keyPath === "" ? { autoIncrement: true } : store.key;
-
-                const objectStore = currentDbVersion.createObjectStore(store.name, key);
-
-                for (let index of store.indexes) {
-
-                    objectStore.createIndex(index.name, index.name, index.definition);
-                }
+                createStore(currentDbVersion, store);
             }
+        }
+    }
+
+    function createStore(currentDbVersion, store) {
+
+        const key = store.key.keyPath === "" ? { autoIncrement: true } : store.key;
+
+        const objectStore = currentDbVersion.createObjectStore(store.name, key);
+
+        for (let index of store.indexes) {
+
+            objectStore.createIndex(index.name, index.name, index.definition);
         }
     }
 
@@ -922,7 +942,12 @@ window.dnetindexeddbinterop = (function () {
                         };
 
                         const onSuccess = (event) => {
-                            getReqObserver.next(cursorRequest.result.key);
+                            if (cursorRequest.result) {
+                                getReqObserver.next(cursorRequest.result.key);
+                            } else {
+                                getReqObserver.next(null);
+                            }
+
                             getReqObserver.complete();
                         };
 
@@ -1039,32 +1064,11 @@ window.dnetindexeddbinterop = (function () {
             return await getByIndex(dbModel, objectStoreName, lowerBound, upperBound, dbIndex, isRange).pipe(Rx.operators.take(1)).toPromise();
         },
 
-        getMaxIndex: async function (indexedDbDatabaseModel, objectStoreName, dbIndex) {
+        getExtent: async function (indexedDbDatabaseModel, objectStoreName, dbIndex, extentType) {
 
             const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
-            return await getExtent(dbModel, objectStoreName, dbIndex, extentTypes.max).pipe(Rx.operators.take(1)).toPromise();
-        },
-
-        getMinIndex: async function (indexedDbDatabaseModel, objectStoreName, dbIndex) {
-
-            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
-
-            return await getExtent(dbModel, objectStoreName, dbIndex, extentTypes.min).pipe(Rx.operators.take(1)).toPromise();
-        },
-
-        getMaxKey: async function (indexedDbDatabaseModel, objectStoreName) {
-
-            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
-
-            return await getExtent(dbModel, objectStoreName, null, extentTypes.max).pipe(Rx.operators.take(1)).toPromise();
-        },
-
-        getMinKey: async function (indexedDbDatabaseModel, objectStoreName) {
-
-            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
-
-            return await getExtent(dbModel, objectStoreName, null, extentTypes.min).pipe(Rx.operators.take(1)).toPromise();
+            return await getExtent(dbModel, objectStoreName, dbIndex, extentTypes[extentType]).pipe(Rx.operators.take(1)).toPromise();
         }
 
     };
