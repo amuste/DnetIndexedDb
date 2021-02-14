@@ -76,9 +76,17 @@
 
         var keyMin = await GridColumnDataIndexedDb.GetMinKey<int>("TableFieldDtos");
 
-        var indexMax = await GridColumnDataIndexedDb.GetMaxIndex<string>("TableFieldDtos", "attachedProperty");
+        var indexMaxTask = GridColumnDataIndexedDb.GetMaxIndex<string>("TableFieldDtos", "attachedProperty");
 
-        var indexMin = await GridColumnDataIndexedDb.GetMinIndex<string>("TableFieldDtos", "attachedProperty");
+        var indexMaxTask2 = GridColumnDataIndexedDb.GetMaxIndex<string>("TableFieldDtos", "attachedProperty");
+
+        var indexMinTask = GridColumnDataIndexedDb.GetMinIndex<string>("TableFieldDtos", "attachedProperty");
+
+        var indexMax = await indexMaxTask;
+
+        var indexMax2 = await indexMaxTask2;
+
+        var indexMin = await indexMinTask;
 
         var db1Result7a = await GridColumnDataIndexedDb.UpdateItems<TableFieldDto>("TableFieldDtos", db1Result5.ToList());
 
