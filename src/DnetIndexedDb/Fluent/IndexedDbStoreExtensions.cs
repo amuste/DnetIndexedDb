@@ -93,7 +93,7 @@ namespace DnetIndexedDb.Fluent
         }
 
         /// <summary>
-        /// Adds Key and Indexes to Store based on IndexedDbKey and IndexedDbIndex Attributes on propertyis in <T>
+        /// Adds Key and Indexes to Store based on IndexedDbKey and IndexedDbIndex Attributes on properties in Type T
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="store"></param>

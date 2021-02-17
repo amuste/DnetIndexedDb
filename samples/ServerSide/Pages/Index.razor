@@ -143,6 +143,14 @@
 
         var db1Result9 = await GridColumnDataIndexedDb2.GetByIndex<int?, TableFieldDto>(11, null, "tableFieldId", false);
 
+        var testMaxKeyEmpty = await GridColumnDataIndexedDb.GetMaxKey<int, TableFieldDto>();
+
+        var testMinKeyEmpty = await GridColumnDataIndexedDb.GetMinKey<int, TableFieldDto>();
+
+        var testMaxIndexEmpty = await GridColumnDataIndexedDb.GetMaxIndex<string, TableFieldDto>("tableFieldId");
+
+        var testMinIndexEmpty = await GridColumnDataIndexedDb.GetMinIndex<string, TableFieldDto>("tableFieldId");
+
         var db1Result10 = await GridColumnDataIndexedDb2.DeleteAll<TableFieldDto>();
 
         var db1Result11 = await GridColumnDataIndexedDb2.DeleteIndexedDb();

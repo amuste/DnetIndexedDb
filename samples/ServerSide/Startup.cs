@@ -37,11 +37,7 @@ namespace DnetIndexedDbServer
 
             services.AddIndexedDbDatabase<GridColumnDataIndexedDb2>(options =>
             {
-                var indexedDbDatabaseModel = new IndexedDbDatabaseModel()
-                    .WithName("TestAttributes")
-                    .WithVersion(1);
-
-                indexedDbDatabaseModel.AddStore<TableFieldDto>();
+                var indexedDbDatabaseModel = GetGridColumnDatabaseModelAttributeBased();
 
                 options.UseDatabase(indexedDbDatabaseModel);
             });
@@ -80,7 +76,9 @@ namespace DnetIndexedDbServer
 
         private IndexedDbDatabaseModel GetGridColumnDatabaseModelAttributeBased()
         {
-            var indexedDbDatabaseModel = new IndexedDbDatabaseModel();
+            var indexedDbDatabaseModel = new IndexedDbDatabaseModel()
+                .WithName("TestAttributes")
+                .WithVersion(1);
 
             indexedDbDatabaseModel.AddStore<TableFieldDto>();
 
