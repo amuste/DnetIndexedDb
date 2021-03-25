@@ -6,6 +6,7 @@
 @inject IJSRuntime JSRuntime
 
 @inject GridColumnDataIndexedDb GridColumnDataIndexedDb
+@inject GridColumnDataIndexedDb2 GridColumnDataIndexedDb2
 @inject SecuritySuiteDataIndexedDb SecuritySuiteDataIndexedDb
 
 <div class="dnet-desktop-content destok-layout" style="padding-top: 10px;">
@@ -26,7 +27,8 @@
     {
         if (firstRender)
         {
-            await InlineKeys();
+            //await InlineKeys();
+            await TestAttributes();
             //await InlineKeysPlusKeyGenerator();
             //await OutOfLinekeys();
             //await InlineKeysTwoDatabases();
@@ -105,6 +107,53 @@
         var testMinIndexEmpty = await GridColumnDataIndexedDb.GetMinIndex<string>("TableFieldDtos", "tableFieldId");
 
         var db1Result11 = await GridColumnDataIndexedDb.DeleteIndexedDb();
+    }
+
+    private async Task TestAttributes()
+    {
+        var tableFieldService = new TableFieldService();
+
+        var itemsDb1 = tableFieldService.GetTableFields();
+
+        var db1Result = await GridColumnDataIndexedDb2.OpenIndexedDb();
+
+        if (db1Result != -1)
+        {
+            var db1Result1 = await GridColumnDataIndexedDb2.DeleteAll<TableFieldDto>();
+        }
+
+        var db1Result2 = await GridColumnDataIndexedDb2.AddItems<TableFieldDto>(itemsDb1);
+
+        var db1Result3 = await GridColumnDataIndexedDb2.GetByKey<int, TableFieldDto>(11);
+
+        var db1Result4 = await GridColumnDataIndexedDb2.DeleteByKey<int, TableFieldDto>(11);
+
+        var db1Result5 = await GridColumnDataIndexedDb2.GetAll<TableFieldDto>();
+
+        var db1Result6 = await GridColumnDataIndexedDb2.GetRange<int, TableFieldDto>(15, 20);
+
+        foreach (var item in db1Result5)
+        {
+            item.FieldVisualName = item.FieldVisualName + "Updated";
+        }
+
+        var db1Result7a = await GridColumnDataIndexedDb2.UpdateItems<TableFieldDto>(db1Result5.ToList());
+
+        var db1Result8 = await GridColumnDataIndexedDb2.GetByIndex<int, TableFieldDto>(11, 18, "tableFieldId", true);
+
+        var db1Result9 = await GridColumnDataIndexedDb2.GetByIndex<int?, TableFieldDto>(11, null, "tableFieldId", false);
+
+        var testMaxKeyEmpty = await GridColumnDataIndexedDb.GetMaxKey<int, TableFieldDto>();
+
+        var testMinKeyEmpty = await GridColumnDataIndexedDb.GetMinKey<int, TableFieldDto>();
+
+        var testMaxIndexEmpty = await GridColumnDataIndexedDb.GetMaxIndex<string, TableFieldDto>("tableFieldId");
+
+        var testMinIndexEmpty = await GridColumnDataIndexedDb.GetMinIndex<string, TableFieldDto>("tableFieldId");
+
+        var db1Result10 = await GridColumnDataIndexedDb2.DeleteAll<TableFieldDto>();
+
+        var db1Result11 = await GridColumnDataIndexedDb2.DeleteIndexedDb();
     }
 
     //***in-line-keys using Key generators***
