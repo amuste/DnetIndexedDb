@@ -1075,20 +1075,21 @@ window.dnetindexeddbinterop = (function () {
             return await deleteDb(dbModel).pipe(Rx.operators.take(1)).toPromise();
         },
 
-        addBlobItem: async function (dbModelGuid, objectStoreName, item) {
-            console.log("Adding Blob");
-            const name = Blazor.platform.readStringField(dbModelGuid, 0);
-            console.log("Guid = " + dbModelGuid);
-            dbModelGuid = "c8748c94-9f3e-4e8e-b771-7d0cf6f8252d"; // param comes through in binary.. fake it for now
-            objectStoreName = "BlobStore";
-            const dbModel = dbModels[0].dbModel;
-            console.log(`Adding Item: ${item}`);
+        addBlobItem: async function (fields, item) {
+            // extract unmarshalled fields from struct
+            const dbModelGuid = Blazor.platform.readStringField(fields, 0);
+            const objectStoreName = Blazor.platform.readStringField(fields, 8);
+            let key = Blazor.platform.readStringField(fields, 16);
+
+            if (key === "") key = null;
+            const dbModel = getDbModel(dbModelGuid).dbModel;
+
+            // create blob from array
             const dataPtr = Blazor.platform.getArrayEntryPtr(item, 0, 4);
             const length = Blazor.platform.getArrayLength(item);
             var blob = new Blob([new Uint8Array(Module.HEAPU8.buffer, dataPtr, length)]);
-            console.log(`Adding Item: ${blob}`);
-            // TODO: pack  key with other argument since 3 args max
-            return await addBlobItem(dbModel, objectStoreName, blob, "firstrecord").pipe(Rx.operators.take(1)).toPromise();
+
+            return await addBlobItem(dbModel, objectStoreName, blob, key).pipe(Rx.operators.take(1)).toPromise();
         },
 
         addItems: async function (indexedDbDatabaseModel, objectStoreName, items) {

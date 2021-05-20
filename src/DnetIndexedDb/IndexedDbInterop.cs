@@ -68,13 +68,16 @@ namespace DnetIndexedDb
         }
 
         [StructLayout(LayoutKind.Explicit)]
-        public struct AddBlobStruct
+        private struct AddBlobStruct
         {
             [FieldOffset(0)]
             public string DbModelGuid;
 
             [FieldOffset(8)]
             public string objectStoreName;
+
+            [FieldOffset(16)]
+            public string key;
         }
 
         /// <summary>
@@ -85,23 +88,16 @@ namespace DnetIndexedDb
         /// <param name="item"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        public string AddBlobItem<TEntity>(string objectStoreName, TEntity item, object key = null)
+        public string AddBlobItem<TEntity>(string objectStoreName, TEntity item, string key = "")
         {
-            Console.WriteLine($"Calling add blob with model guid {_indexedDbDatabaseModel.DbModelGuid} store nbame {objectStoreName}");            
-
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
             var addblob = new AddBlobStruct
             {
                 DbModelGuid = _indexedDbDatabaseModel.DbModelGuid,
                 objectStoreName = objectStoreName,
+                key = key
             };
             var unmarshalledRuntime = (IJSUnmarshalledRuntime)_jsRuntime;
-            var res= unmarshalledRuntime.InvokeUnmarshalled<string, string, TEntity, string>
-                ("dnetindexeddbinterop.addBlobItem", _indexedDbDatabaseModel.DbModelGuid, objectStoreName, item);
-            Console.WriteLine($"Added 5Mb blob to indexeddb in {sw.ElapsedMilliseconds}ms");
-            return res;
-            //return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.addBlobItem", _indexedDbDatabaseModel, objectStoreName, item,key);
+            return unmarshalledRuntime.InvokeUnmarshalled<AddBlobStruct, TEntity, string> ("dnetindexeddbinterop.addBlobItem", addblob, item);
         }
 
         /// <summary>
