@@ -236,6 +236,78 @@ window.dnetindexeddbinterop = (function () {
         });
     }
 
+    function addBlobItem(dbModel, objectStoreName, data, key = null) {
+
+        return Rx.Observable.create((observer) => {
+
+            if (dbModel.instance === null) {
+
+                observer.error(indexedDbMessages.DB_CLOSE);
+
+            } else {
+
+                const transaction = dbModel.instance.transaction([objectStoreName], transactionTypes.readwrite);
+
+                const onTransactionError = (error) => {
+                    observer.error(indexedDbMessages.DB_TRANSACTION_ERROR);
+                };
+
+                const onComplete = (event) => {
+                    observer.next(indexedDbMessages.DB_DATA_ADDED);
+                    observer.complete();
+                };
+
+                const objectStore = transaction.objectStore(objectStoreName);
+
+                const addItem = (item,key) => {
+
+                    return new Rx.Observable((addReqObserver) => {
+
+                        const store = dbModel.stores.find(p => p.name === objectStoreName);
+
+                        const keyPath = store.key.keyPath;
+
+                        if (keyPath !== "" && dbModel.useKeyGenerator) delete item[keyPath];
+
+                        const addRequest = objectStore.add(item,key);
+
+                        const onRequestError = (error) => {
+                            addReqObserver.error(indexedDbMessages.DB_DATA_ADD_ERROR);
+                        };
+
+                        const onSuccess = (event) => {
+                            addReqObserver.next(event);
+                            addReqObserver.complete();
+                        };
+
+                        addRequest.addEventListener(eventTypes.success, onSuccess);
+                        addRequest.addEventListener(eventTypes.error, onRequestError);
+
+                        return () => {
+                            addRequest.removeEventListener(eventTypes.success, onSuccess);
+                            addRequest.removeEventListener(eventTypes.error, onRequestError);
+                        };
+
+                    });
+                };
+
+                transaction.addEventListener(eventTypes.error, onTransactionError);
+                transaction.addEventListener(eventTypes.complete, onComplete);
+
+                const addRequestSubscriber = addItem(data,key)
+                .subscribe(() => { }, (error) => { observer.error(error); });
+
+                return () => {
+                    transaction.removeEventListener(eventTypes.complete, onComplete);
+                    transaction.removeEventListener(eventTypes.error, onTransactionError);
+                    addRequestSubscriber.unsubscribe();
+                };
+
+            }
+        });
+    }
+
+
     function addItems(dbModel, objectStoreName, data, concurrentTranscations = 20) {
 
         return Rx.Observable.create((observer) => {
@@ -1001,6 +1073,22 @@ window.dnetindexeddbinterop = (function () {
             const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await deleteDb(dbModel).pipe(Rx.operators.take(1)).toPromise();
+        },
+
+        addBlobItem: async function (dbModelGuid, objectStoreName, item) {
+            console.log("Adding Blob");
+            const name = Blazor.platform.readStringField(dbModelGuid, 0);
+            console.log("Guid = " + dbModelGuid);
+            dbModelGuid = "c8748c94-9f3e-4e8e-b771-7d0cf6f8252d"; // param comes through in binary.. fake it for now
+            objectStoreName = "BlobStore";
+            const dbModel = dbModels[0].dbModel;
+            console.log(`Adding Item: ${item}`);
+            const dataPtr = Blazor.platform.getArrayEntryPtr(item, 0, 4);
+            const length = Blazor.platform.getArrayLength(item);
+            var blob = new Blob([new Uint8Array(Module.HEAPU8.buffer, dataPtr, length)]);
+            console.log(`Adding Item: ${blob}`);
+            // TODO: pack  key with other argument since 3 args max
+            return await addBlobItem(dbModel, objectStoreName, blob, "firstrecord").pipe(Rx.operators.take(1)).toPromise();
         },
 
         addItems: async function (indexedDbDatabaseModel, objectStoreName, items) {

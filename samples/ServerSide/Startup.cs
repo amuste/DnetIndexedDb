@@ -3,6 +3,7 @@ using DnetIndexedDb;
 using DnetIndexedDb.Fluent;
 using DnetIndexedDb.Models;
 using DnetIndexedDbServer.Infrastructure;
+using DnetIndexedDbServer.Infrastructure.Blob;
 using DnetIndexedDbServer.Infrastructure.Entities;
 using DnetIndexedDbServer.Shared.Kylar;
 using Microsoft.AspNetCore.Builder;
@@ -30,6 +31,8 @@ namespace DnetIndexedDbServer
 
             services.AddHttpClient();
 
+
+
             services.AddIndexedDbDatabase<GridColumnDataIndexedDb>(options =>
             {
                 options.UseDatabase(GetGridColumnDatabaseModel());
@@ -41,6 +44,8 @@ namespace DnetIndexedDbServer
 
                 options.UseDatabase(indexedDbDatabaseModel);
             });
+
+
 
             var model1 = new SecurityDatabase();
             services.AddIndexedDbDatabase<SecuritySuiteDataIndexedDb>(options =>
@@ -73,6 +78,7 @@ namespace DnetIndexedDbServer
                 endpoints.MapFallbackToPage("/_Host");
             });
         }
+
 
         private IndexedDbDatabaseModel GetGridColumnDatabaseModelAttributeBased()
         {

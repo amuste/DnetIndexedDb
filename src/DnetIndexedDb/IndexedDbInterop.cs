@@ -4,6 +4,9 @@ using Microsoft.JSInterop;
 using System.Threading.Tasks;
 using DnetIndexedDb.Models;
 using System.Text.Json;
+using System.Diagnostics;
+using System.Text;
+using System.Runtime.InteropServices;
 
 namespace DnetIndexedDb
 {
@@ -62,6 +65,43 @@ namespace DnetIndexedDb
         public async ValueTask<string> DeleteIndexedDb()
         {
             return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.deleteDb", _indexedDbDatabaseModel);
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        public struct AddBlobStruct
+        {
+            [FieldOffset(0)]
+            public string DbModelGuid;
+
+            [FieldOffset(8)]
+            public string objectStoreName;
+        }
+
+        /// <summary>
+        /// Add records to a given data store
+        /// </summary>
+        /// <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <param name="item"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public string AddBlobItem<TEntity>(string objectStoreName, TEntity item, object key = null)
+        {
+            Console.WriteLine($"Calling add blob with model guid {_indexedDbDatabaseModel.DbModelGuid} store nbame {objectStoreName}");            
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            var addblob = new AddBlobStruct
+            {
+                DbModelGuid = _indexedDbDatabaseModel.DbModelGuid,
+                objectStoreName = objectStoreName,
+            };
+            var unmarshalledRuntime = (IJSUnmarshalledRuntime)_jsRuntime;
+            var res= unmarshalledRuntime.InvokeUnmarshalled<string, string, TEntity, string>
+                ("dnetindexeddbinterop.addBlobItem", _indexedDbDatabaseModel.DbModelGuid, objectStoreName, item);
+            Console.WriteLine($"Added 5Mb blob to indexeddb in {sw.ElapsedMilliseconds}ms");
+            return res;
+            //return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.addBlobItem", _indexedDbDatabaseModel, objectStoreName, item,key);
         }
 
         /// <summary>

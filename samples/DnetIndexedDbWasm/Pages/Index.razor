@@ -1,0 +1,47 @@
+﻿@page "/"
+@using DnetIndexedDb.Blob
+@*@inject IHttpClientFactory ClientFactory*@
+
+@inject IJSRuntime JSRuntime
+@inject BlobDb  BlobDb
+
+<div class="dnet-desktop-content destok-layout" style="padding-top: 10px;">
+    <div class="row" style="height: calc(100% - 0px)">
+        <div class="col-12" style="height: calc(100% - 0px);">
+            <div style="height: calc(100% - 0px); width: 100%; background-color: #FFFFFF">
+                <span>Thanks for your interest in DnetIndexedDb!. Go to Index.razor and debug</span>
+                <button @onclick="TestBlob">Click to load blob</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        @*if (firstRender)
+        {
+            await TestBlob();
+        }*@
+    }
+
+    private async Task TestBlob()
+    {
+       var db1Result = await BlobDb.OpenIndexedDb();  
+        if (db1Result != -1)
+        {
+            byte[] Blob = new byte[	5242880];
+            //Blob[10] = 129;
+            //List<byte[]> Blobs = new List<byte[]>();
+            //Blobs.Add(Blob);
+            var db1Resultdel = BlobDb.DeleteAll("BlobStore");
+            var db1Result1 = BlobDb.AddBlobItem<byte[]>("BlobStore", Blob,"firstrecord");
+        }
+    }
+
+}
+
+
+
+
