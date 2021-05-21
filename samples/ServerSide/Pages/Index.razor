@@ -1,12 +1,11 @@
 ﻿@page "/"
 @using DnetIndexedDbServer.Infrastructure
 @using DnetIndexedDbServer.Infrastructure.Entities
-@using DnetIndexedDbServer.Infrastructure.Blob
 @inject IHttpClientFactory ClientFactory
 
 @inject IJSRuntime JSRuntime
-@inject BlobDb  BlobDb
-@inject GridColumnDataIndexedDb  GridColumnDataIndexedDb
+
+@inject GridColumnDataIndexedDb GridColumnDataIndexedDb
 @inject GridColumnDataIndexedDb2 GridColumnDataIndexedDb2
 @inject SecuritySuiteDataIndexedDb SecuritySuiteDataIndexedDb
 
@@ -28,25 +27,12 @@
     {
         if (firstRender)
         {
-            await TestBlob();
             //await InlineKeys();
-            //await TestAttributes();
+            await TestAttributes();
             //await InlineKeysPlusKeyGenerator();
             //await OutOfLinekeys();
             //await InlineKeysTwoDatabases();
             //await TestUpgrade();
-        }
-    }
-
-    private async Task TestBlob()
-    {
-       var db1Result = await BlobDb.OpenIndexedDb();  
-        if (db1Result != -1)
-        {
-            byte[] Blob = new byte[32768]; 
-            //List<byte[]> Blobs = new List<byte[]>();
-            //Blobs.Add(Blob);
-            var db1Result1 = BlobDb.AddBlobItem<byte[]>("BlobStore", Blob,"firstrecord");
         }
     }
 
