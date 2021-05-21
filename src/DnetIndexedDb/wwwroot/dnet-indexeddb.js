@@ -1116,12 +1116,21 @@ window.dnetindexeddbinterop = (function () {
             return await updateItemsByKey(dbModel, objectStoreName, items, keys).pipe(Rx.operators.take(1)).toPromise();
         },
 
+        assignBlobToElement: async function (indexedDbDatabaseModel, objectStoreName, key, elementId, attribute) {
+            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+            const res = await getByKey(dbModel, objectStoreName, key).pipe(Rx.operators.take(1)).toPromise();
+            var el = document.getElementById(elementId);
+            var url=URL.createObjectURL(res);
+            el.setAttribute(attribute, url);
+        },
+
         // This is really slow since it has to base64 encode anything going back to blazor.
         // You could directly reference the blob using something like this which should be faster:
         /// var preview = document.getElementById('preview');
         //  URL.createObjectURL(blobvar); 
         //  preview.setAttribute('src', url);
         //https://schibsted.com/blog/the-magic-of-createobjecturl/
+        //https://developer.mozilla.org/en-US/docs/Web/API/File/Using_files_from_web_applications#example_using_object_urls_to_display_images
         getBlobByKey: async function (indexedDbDatabaseModel, objectStoreName, key) {
 
             const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;

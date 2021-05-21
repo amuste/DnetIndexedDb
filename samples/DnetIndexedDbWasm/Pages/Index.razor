@@ -24,7 +24,18 @@
             </div>
             <button @onclick="ClearDisplay">Clear Display</button>
             <button @onclick="LoadFromDb">Load Base 64 Pics From IndexDb</button>
+            <button @onclick="DirectShow">Directly show blob From IndexDb</button>
             <div>&nbsp;</div>
+            <img id="testshow1" />
+            <img id="testshow2" />
+            <img id="testshow3" />
+            <img id="testshow4" />
+            <img id="testshow5" />
+            <img id="testshow6" />
+            <img id="testshow7" />
+            <img id="testshow8" />
+            <img id="testshow9" />
+            <img id="testshow10" />
             @foreach (var message in Messages)
             {
                 <div>@message</div>
@@ -58,6 +69,37 @@
         Messages.Clear();
         Pics.Clear();
         BinaryPics.Clear();
+    }
+
+    private async Task DirectShow()
+    {
+        var db1Result = await BlobDb.OpenIndexedDb();
+        Stopwatch sw = new Stopwatch();
+        sw.Start();
+
+        if (db1Result != -1)
+        {
+            int counter = 0;
+            bool ok = true;
+            while (ok)
+            {
+                counter++;
+                string key = counter.ToString() + "-binary";
+                try
+                {
+                    var res = await BlobDb.AssignBlobToElement<string>("BlobStore", key, "testshow" + counter.ToString(),"src");
+                    Messages.Add($"Direct showed Blob {key}");
+                }
+                catch (JSException ex)
+                {
+                    ok = false;
+                    // TODO: Better error checking
+                    if (! ex.Message.Contains("Failed to execute 'createObjectURL' on 'URL'"))
+                        Messages.Add(ex.ToString());
+                }
+            }
+            Messages.Add($"Showed binary blobs in {sw.ElapsedMilliseconds}ms ");
+        }             
     }
 
     /// <summary>
