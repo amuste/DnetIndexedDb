@@ -78,6 +78,9 @@ namespace DnetIndexedDb
 
             [FieldOffset(16)]
             public string key;
+
+            [FieldOffset(24)]
+            public string mimeType;
         }
 
         /// <summary>
@@ -87,14 +90,16 @@ namespace DnetIndexedDb
         /// <param name="objectStoreName"></param>
         /// <param name="item"></param>
         /// <param name="key"></param>
+        /// <param name="mimeType"></param>
         /// <returns></returns>
-        public string AddBlobItem<TEntity>(string objectStoreName, TEntity item, string key = "")
+        public string AddBlobItem<TEntity>(string objectStoreName, TEntity item, string mimeType, string key = "")
         {
             var addblob = new AddBlobStruct
             {
                 DbModelGuid = _indexedDbDatabaseModel.DbModelGuid,
                 objectStoreName = objectStoreName,
-                key = key
+                key = key,
+                mimeType = mimeType
             };
             var unmarshalledRuntime = (IJSUnmarshalledRuntime)_jsRuntime;
             return unmarshalledRuntime.InvokeUnmarshalled<AddBlobStruct, TEntity, string> ("dnetindexeddbinterop.addBlobItem", addblob, item);
@@ -182,6 +187,19 @@ namespace DnetIndexedDb
         public async ValueTask<TEntity> GetByKey<TKey, TEntity>(string objectStoreName, TKey key)
         {
             return await _jsRuntime.InvokeAsync<TEntity>("dnetindexeddbinterop.getByKey", _indexedDbDatabaseModel, objectStoreName, key);
+        }
+
+
+        /// <summary>
+        /// Return a record in a given data store by its key
+        /// </summary>
+        /// <typeparam name="TKey">Type of Key Field</typeparam>
+        /// <param name="key"></param>
+        /// <param name="objectStoreName"></param>
+        /// <returns></returns>
+        public async ValueTask<string> GetBlobByKey<TKey>(string objectStoreName, TKey key)
+        {
+            return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.getBlobByKey", _indexedDbDatabaseModel, objectStoreName, key);
         }
 
         /// <summary>

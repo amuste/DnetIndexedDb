@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using DnetIndexedDb.Blob
 @using System.Diagnostics
+@using System.Text.Json
 @*@inject IHttpClientFactory ClientFactory*@
 
 @inject IJSRuntime JSRuntime
@@ -11,19 +12,92 @@
         <div class="col-12" style="height: calc(100% - 0px);">
             <div style="height: calc(100% - 0px); width: 100%; background-color: #FFFFFF">
                 <span>Thanks for your interest in DnetIndexedDb!. Go to Index.razor and debug</span>
-                <button @onclick="TestBlob">Click to load blob</button>
-                <div>@Message</div>
+                <button @onclick="TestBlob">Click to load test generated blob or </button>
+
+            <div class="dropArea @dropClass">
+                Drag and drop your pictures here or click to open file loading dialogue...
+                <InputFile id="inputDrop" 
+                           OnChange="@HandleSelected"
+                           @ondragenter="HandleDragEnter"
+                           @ondragleave="HandleDragLeave"
+                           multiple />
+            </div>
+            <button @onclick="ClearDisplay">Clear Display</button>
+            <button @onclick="LoadFromDb">Load Base 64 Pics From IndexDb</button>
+            <div>&nbsp;</div>
+            @foreach (var message in Messages)
+            {
+                <div>@message</div>
+            }
+
+            @foreach (var pic in Pics)
+            {
+                <img src="@pic" />
+            }
             </div>
         </div>
     </div>
 </div>
 
 @code {
-    public string Message { get; set; }
+    public List<string> Messages { get; set; } = new List<string>();
+    public List<string> Pics { get; set; } = new List<string>(); //base64 encoded
+    public List<(byte[],string )> BinaryPics { get; set; } = new List<( byte[], string)>(); // binary
+    string dropClass = string.Empty;
+
+    private void HandleDragEnter()
+    {
+        dropClass = "dropAreaDrug";
+    }
+    private void HandleDragLeave()
+    {
+        dropClass = string.Empty;
+    }
+    private void ClearDisplay()
+    {
+        Messages.Clear();
+        Pics.Clear();
+        BinaryPics.Clear();
+    }
+
+    /// <summary>
+    /// Loading from DB is very slow since we have to marshall data coming back from javascript (but not going to javascript)
+    /// </summary>
+    /// <returns></returns>
+    private async Task LoadFromDb()
+    {
+        var db1Result = await BlobDb.OpenIndexedDb();
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+        if (db1Result != -1)
+        {
+            int counter = 0;
+            bool ok = true;
+            while (ok)
+            {
+                counter++;
+                string key = counter.ToString() + "-binary";
+                try
+                {
+                    string blob = await BlobDb.GetBlobByKey<string>("BlobStore", key);
+                    Pics.Add(blob);
+                    Messages.Add($"Loaded Blob {key}");
+                }
+                catch (JSException ex)
+                {
+                    ok = false;
+                    // TODO: Better error checking
+                    if (! ex.Message.Contains("parameter 1 is not of type 'Blob'"))
+                        Messages.Add(ex.ToString());
+                }
+            }
+            Messages.Add($"Got binary blobs in {sw.ElapsedMilliseconds}ms ");
+        }        
+    }
 
     private async Task TestBlob()
     {
-       var db1Result = await BlobDb.OpenIndexedDb();  
+        var db1Result = await BlobDb.OpenIndexedDb();  
         if (db1Result != -1)
         {
             byte[] Blob = new byte[	5242880];
@@ -34,8 +108,61 @@
             Stopwatch sw = new Stopwatch();
             sw.Start();
             var db1Result1 = BlobDb.AddBlobItem<byte[]>("BlobStore", Blob,"firstrecord");
-            Message = $"Added 5Mb blob to store in {sw.ElapsedMilliseconds} ms";
+            Messages.Add($"Added 5Mb blob to store in {sw.ElapsedMilliseconds} ms");
+            sw.Restart();
+            string blob = await BlobDb.GetBlobByKey<string>("BlobStore", "firstrecord");
+
+            Messages.Add($"Got blob in {sw.ElapsedMilliseconds}ms ");
         }
+    }
+
+    private async Task HandleSelected(InputFileChangeEventArgs e)
+    {
+        Stopwatch sw = new Stopwatch();
+        var imageFiles = e.GetMultipleFiles(999);
+        int id = 0;
+        foreach (var imageFile in imageFiles)
+        {
+            if (imageFile != null)
+            {
+                IBrowserFile useFile = imageFile;
+                
+                sw.Start();
+                using (var ms = useFile.OpenReadStream(useFile.Size))
+                {
+                    //var content = new MultipartFormDataContent();
+                    //content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data");
+                    //content.Add(new StreamContent(ms, Convert.ToInt32(resizedFile.Size)), "image", imageFile.Name);
+                    byte[] buffer = new byte[useFile.Size];
+                    await ms.ReadAsync(buffer);
+                    Messages.Add($"Read file name {imageFile.Name} size {imageFile.Size}, content type { imageFile.ContentType}");
+                    BinaryPics.Add((buffer, imageFile.ContentType));
+                    //var encoded = "data:image/png;base64," + Convert.ToBase64String(buffer);
+                    //var encoded = "data:" + imageFile.ContentType + ";base64," + Convert.ToBase64String(buffer);
+                    //Pics.Add(encoded);
+                }
+                //Messages.Add($"Time to encode images {sw.ElapsedMilliseconds}ms size:{useFile.Size}");
+            }
+        }
+        int count = 0;
+        
+        var result = await BlobDb.OpenIndexedDb();
+        var res2 = await BlobDb.DeleteAll("BlobStore");
+        //sw.Restart();
+        //foreach (var pic in Pics)
+        //{
+         //   count++;
+         //   var newres = BlobDb.AddBlobItem<string>("BlobStore",  pic, "",count.ToString());
+        //}
+        //Messages.Add($"Successfully saved {count} base64 encoded images in {sw.ElapsedMilliseconds} ms");
+        sw.Restart();
+        count = 0;
+        foreach (var pic in BinaryPics)
+        {
+            count++;
+            var newres = BlobDb.AddBlobItem<byte[]>("BlobStore", pic.Item1, pic.Item2, count.ToString()+"-binary");
+        }
+        Messages.Add($"Successfully saved {count} binary images in {sw.ElapsedMilliseconds} ms");
     }
 
 }

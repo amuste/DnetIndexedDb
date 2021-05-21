@@ -571,6 +571,8 @@ window.dnetindexeddbinterop = (function () {
                         };
 
                         const onSuccess = (event) => {
+//                            console.log("Got Record:");     // FSIGAP
+//                            console.log(getRequest.result); // FSIGAP 
                             getReqObserver.next(getRequest.result);
                             getReqObserver.complete();
                         };
@@ -1080,14 +1082,15 @@ window.dnetindexeddbinterop = (function () {
             const dbModelGuid = Blazor.platform.readStringField(fields, 0);
             const objectStoreName = Blazor.platform.readStringField(fields, 8);
             let key = Blazor.platform.readStringField(fields, 16);
-
+            const mimeType = Blazor.platform.readStringField(fields, 24);
+            console.log(`Adding file with mime type ${mimeType}`);
             if (key === "") key = null;
             const dbModel = getDbModel(dbModelGuid).dbModel;
 
             // create blob from array
             const dataPtr = Blazor.platform.getArrayEntryPtr(item, 0, 4);
             const length = Blazor.platform.getArrayLength(item);
-            var blob = new Blob([new Uint8Array(Module.HEAPU8.buffer, dataPtr, length)]);
+            var blob = new Blob([new Uint8Array(Module.HEAPU8.buffer, dataPtr, length)], { type: mimeType });
 
             return await addBlobItem(dbModel, objectStoreName, blob, key).pipe(Rx.operators.take(1)).toPromise();
         },
@@ -1113,10 +1116,29 @@ window.dnetindexeddbinterop = (function () {
             return await updateItemsByKey(dbModel, objectStoreName, items, keys).pipe(Rx.operators.take(1)).toPromise();
         },
 
+        // This is really slow since it has to base64 encode anything going back to blazor.
+        // You could directly reference the blob using something like this which should be faster:
+        /// var preview = document.getElementById('preview');
+        //  URL.createObjectURL(blobvar); 
+        //  preview.setAttribute('src', url);
+        //https://schibsted.com/blog/the-magic-of-createobjecturl/
+        getBlobByKey: async function (indexedDbDatabaseModel, objectStoreName, key) {
+
+            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+            const res = await getByKey(dbModel, objectStoreName, key).pipe(Rx.operators.take(1)).toPromise();
+            const reader = new FileReader();
+            reader.readAsDataURL(res);
+            return new Promise(resolve => {
+                reader.onloadend = () => {
+                    resolve(reader.result);
+                };
+            });
+        },
+
+
         getByKey: async function (indexedDbDatabaseModel, objectStoreName, key) {
 
             const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
-
             return await getByKey(dbModel, objectStoreName, key).pipe(Rx.operators.take(1)).toPromise();
         },
 
