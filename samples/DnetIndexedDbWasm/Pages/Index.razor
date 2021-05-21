@@ -87,7 +87,7 @@
                 string key = counter.ToString() + "-binary";
                 try
                 {
-                    var res = await BlobDb.AssignBlobToElement<string>("BlobStore", key, "testshow" + counter.ToString(),"src");
+                    var res = await BlobDb.AssignBlobToElement("BlobStore", key, "testshow" + counter.ToString(),"src");
                     Messages.Add($"Direct showed Blob {key}");
                 }
                 catch (JSException ex)
@@ -121,7 +121,7 @@
                 string key = counter.ToString() + "-binary";
                 try
                 {
-                    string blob = await BlobDb.GetBlobByKey<string>("BlobStore", key);
+                    string blob = await BlobDb.GetBlobByKey("BlobStore", key);
                     Pics.Add(blob);
                     Messages.Add($"Loaded Blob {key}");
                 }
@@ -149,10 +149,10 @@
             var db1Resultdel = BlobDb.DeleteAll("BlobStore");
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            var db1Result1 = BlobDb.AddBlobItem<byte[]>("BlobStore", Blob,"firstrecord");
+            var db1Result1 = BlobDb.AddBlobItem<byte[]>("BlobStore", Blob, "","firstrecord");
             Messages.Add($"Added 5Mb blob to store in {sw.ElapsedMilliseconds} ms");
             sw.Restart();
-            string blob = await BlobDb.GetBlobByKey<string>("BlobStore", "firstrecord");
+            string blob = await BlobDb.GetBlobByKey("BlobStore", "firstrecord");
 
             Messages.Add($"Got blob in {sw.ElapsedMilliseconds}ms ");
         }

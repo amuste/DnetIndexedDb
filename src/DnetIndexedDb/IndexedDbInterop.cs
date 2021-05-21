@@ -193,11 +193,10 @@ namespace DnetIndexedDb
         /// <summary>
         /// Return a record in a given data store by its key
         /// </summary>
-        /// <typeparam name="TKey">Type of Key Field</typeparam>
         /// <param name="key"></param>
         /// <param name="objectStoreName"></param>
         /// <returns></returns>
-        public async ValueTask<string> GetBlobByKey<TKey>(string objectStoreName, TKey key)
+        public async ValueTask<string> GetBlobByKey(string objectStoreName, string key)
         {
             return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.getBlobByKey", _indexedDbDatabaseModel, objectStoreName, key);
         }
@@ -212,7 +211,7 @@ namespace DnetIndexedDb
         /// <param name="elementId"></param>
         /// <param name="attribute"></param>
         /// <returns></returns>
-        public async ValueTask<string> AssignBlobToElement<TKey>(string objectStoreName, TKey key, string elementId, string attribute)
+        public async ValueTask<string> AssignBlobToElement(string objectStoreName, string key, string elementId, string attribute)
         {
             return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.assignBlobToElement", _indexedDbDatabaseModel, objectStoreName, key, elementId, attribute);
         }

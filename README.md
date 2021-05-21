@@ -520,4 +520,29 @@ OR
   var result = await GridColumnDataIndexedDb.DeleteIndexedDb();
 ```
  
- 
+## Blobs
+
+### Add a binary blob to the store
+
+```ValueTask<string> AddBlobItem<TEntity>(string objectStoreName, TEntity item, string mimeType, string key = "")```
+
+```CSharp
+  var result = await BlobDb.AddBlobItem<byte[]>("StoreName", Blob,"image/jpeg", "myrecordkey1");
+```
+
+### Get base 64 encoded blob from the store (slow!)
+
+```ValueTask<string> GetBlobByKey(string objectStoreName, key)```
+
+```CSharp
+  var result = await BlobDb.GetBlobByKey("StoreName", Blob,"image/jpeg", "myrecordkey1");
+```
+
+### Assign blob directly to HTML element without marshalling into .NET (fast)
+
+```ValueTask<string> AssignBlobToElement(string objectStoreName, string key, string elementId, string attribute)```
+
+```CSharp
+  var result = await BlobDb.AssignBlobToElement("StoreName", "myrecordkey1", "myimagetagId","src");
+```
+
