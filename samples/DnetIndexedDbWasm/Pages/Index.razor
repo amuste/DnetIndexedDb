@@ -24,6 +24,7 @@
             </div>
             <button @onclick="ClearDisplay">Clear Display</button>
             <button @onclick="LoadFromDb">Load Base 64 Pics From IndexDb</button>
+            <button @onclick="BinaryLoadFromDb">Load Binary Pics From IndexDb</button>
             <button @onclick="DirectShow">Directly show blob From IndexDb</button>
             <div>&nbsp;</div>
             <img id="testshow1" />
@@ -102,6 +103,57 @@
         }             
     }
 
+   /// <summary>
+    /// Faster load from DB, writes directly into .NET memory from javascript
+    /// </summary>
+    /// <returns></returns>
+    private async Task BinaryLoadFromDb()
+    {
+        var buffer = new byte[10485760]; // 10Mb max.. TODO: have second call to determine size of buffer needed?
+        int bytecount = 0;
+        var db1Result = await BlobDb.OpenIndexedDb();
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+        if (db1Result != -1)
+        {
+            int counter = 0;
+            bool ok = true;
+            while (ok)
+            {
+                counter++;
+                string key = counter.ToString() + "-binary";
+                try
+                {
+                    Messages.Add($"Loading record {key}");
+                    int res = await BlobDb.GetBlobByKey("BlobStore", key,buffer,10485760);
+                    if (res == -1) 
+                        ok=false;
+                    else
+                    {
+                        bytecount = res;
+                        Messages.Add($"Loaded Blob length={res} first three bytes = {buffer[0]} {buffer[1]} {buffer[2]}");
+                        //StateHasChanged();
+                    }
+                }
+                catch (JSException ex)
+                {
+                    ok = false;
+                    // TODO: Better error checking
+                    if (! ex.Message.Contains("parameter 1 is not of type 'Blob'"))
+                        Messages.Add(ex.ToString());
+                }
+            }
+            Messages.Add($"Got binary blobs in {sw.ElapsedMilliseconds}ms ");
+            sw.Restart();
+            string pic = $"data:image;base64,{System.Convert.ToBase64String(buffer,0,bytecount)}";
+            Messages.Add($"Converted binary blobs in {sw.ElapsedMilliseconds}ms ");
+            StateHasChanged();
+            await Task.Delay(100);//get the UI to paint before loading
+            //Console.WriteLine(pic);
+
+            Pics.Add(pic);
+        }        
+    }
     /// <summary>
     /// Loading from DB is very slow since we have to marshall data coming back from javascript (but not going to javascript)
     /// </summary>
@@ -122,6 +174,7 @@
                 try
                 {
                     string blob = await BlobDb.GetBlobByKey("BlobStore", key);
+                    //Console.WriteLine(blob);
                     Pics.Add(blob);
                     Messages.Add($"Loaded Blob {key}");
                 }
