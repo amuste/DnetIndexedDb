@@ -2,6 +2,7 @@
 @using DnetIndexedDb.Blob
 @using System.Diagnostics
 @using System.Text.Json
+@using System.Text
 @*@inject IHttpClientFactory ClientFactory*@
 
 @inject IJSRuntime JSRuntime
@@ -22,8 +23,11 @@
                            @ondragleave="HandleDragLeave"
                            multiple />
             </div>
+            <input type="checkbox" id="base64" name="math" value="add" @bind="SaveBase64" />
+<label for="base64">Save/Load a Copy as Base64</label>
             <button @onclick="ClearDisplay">Clear Display</button>
             <button @onclick="LoadFromDb">Load Base 64 Pics From IndexDb</button>
+            <button @onclick="BinaryLoadFromDb">Load Binary Pics From IndexDb</button>
             <button @onclick="DirectShow">Directly show blob From IndexDb</button>
             <div>&nbsp;</div>
             <img id="testshow1" />
@@ -51,6 +55,7 @@
 </div>
 
 @code {
+    public bool SaveBase64 { get; set; } = false;
     public List<string> Messages { get; set; } = new List<string>();
     public List<string> Pics { get; set; } = new List<string>(); //base64 encoded
     public List<(byte[],string )> BinaryPics { get; set; } = new List<( byte[], string)>(); // binary
@@ -102,6 +107,64 @@
         }             
     }
 
+   /// <summary>
+    /// Faster load from DB, writes directly into .NET memory from javascript
+    /// </summary>
+    /// <returns></returns>
+    private async Task BinaryLoadFromDb()
+    {
+        var buffer = new byte[10485760]; // 10Mb max.. TODO: have second call to determine size of buffer needed?
+        int bytecount = 0;
+        var db1Result = await BlobDb.OpenIndexedDb();
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+        if (db1Result != -1)
+        {
+            int counter = 0;
+            bool ok = true;
+            while (ok)
+            {
+                counter++;
+               
+                string key = counter.ToString() + "-binary";
+                if (SaveBase64) key = counter.ToString() + "-base64";
+                try
+                {
+                    Messages.Add($"Loading record {key}");
+                    int res = await BlobDb.GetBlobByKey("BlobStore", key,buffer,10485760);
+                    if (res == -1) 
+                        ok=false;
+                    else
+                    {
+                        bytecount = res;
+                        Messages.Add($"Loaded Blob length={res} first three bytes = {buffer[0]} {buffer[1]} {buffer[2]}");
+                        //StateHasChanged();
+                    }
+                }
+                catch (JSException ex)
+                {
+                    ok = false;
+                    // TODO: Better error checking
+                    if (! ex.Message.Contains("parameter 1 is not of type 'Blob'"))
+                        Messages.Add(ex.ToString());
+                }
+            }
+            Messages.Add($"Got binary blobs in {sw.ElapsedMilliseconds}ms ");
+            sw.Restart();
+            string pic;
+            if (SaveBase64) 
+                pic = Encoding.ASCII.GetString(buffer,0,bytecount); // blob was saved already converted to base64
+            else
+                pic= $"data:image;base64,{System.Convert.ToBase64String(buffer,0,bytecount)}"; //blob in binary format
+            
+            Messages.Add($"Converted binary blobs in {sw.ElapsedMilliseconds}ms ");
+            StateHasChanged();
+            await Task.Delay(100);//get the UI to paint before loading
+            //Console.WriteLine(pic);
+
+            Pics.Add(pic);
+        }        
+    }
     /// <summary>
     /// Loading from DB is very slow since we have to marshall data coming back from javascript (but not going to javascript)
     /// </summary>
@@ -122,6 +185,7 @@
                 try
                 {
                     string blob = await BlobDb.GetBlobByKey("BlobStore", key);
+                    //Console.WriteLine(blob);
                     Pics.Add(blob);
                     Messages.Add($"Loaded Blob {key}");
                 }
@@ -151,10 +215,17 @@
             sw.Start();
             var db1Result1 = BlobDb.AddBlobItem<byte[]>("BlobStore", Blob, "","firstrecord");
             Messages.Add($"Added 5Mb blob to store in {sw.ElapsedMilliseconds} ms");
+            StateHasChanged();
+            await Task.Delay(1);
+            sw.Restart();
+            byte[] buffer = new byte[5242880];
+            var blob2 = await BlobDb.GetBlobByKey("BlobStore", "firstrecord",buffer,5242880);
+            Messages.Add($"Got blob with (shared buffer) method in {sw.ElapsedMilliseconds}ms ");
+            StateHasChanged();
+            await Task.Delay(1);
             sw.Restart();
             string blob = await BlobDb.GetBlobByKey("BlobStore", "firstrecord");
-
-            Messages.Add($"Got blob in {sw.ElapsedMilliseconds}ms ");
+            Messages.Add($"Got blob using marshalling in {sw.ElapsedMilliseconds}ms ");
         }
     }
 
@@ -205,6 +276,18 @@
             var newres = BlobDb.AddBlobItem<byte[]>("BlobStore", pic.Item1, pic.Item2, count.ToString()+"-binary");
         }
         Messages.Add($"Successfully saved {count} binary images in {sw.ElapsedMilliseconds} ms");
+        if (SaveBase64)
+        {
+            count = 0;
+            foreach (var pic in BinaryPics)
+            {
+                count++;
+                var str = "data:image;base64," + System.Convert.ToBase64String(pic.Item1);
+                var bytes = Encoding.ASCII.GetBytes(str);
+                var newres = BlobDb.AddBlobItem<byte[]>("BlobStore", bytes, pic.Item2, count.ToString() + "-base64");
+            }
+            Messages.Add($"Successfully saved {count} base64 images in {sw.ElapsedMilliseconds} ms");
+        }
     }
 
 }

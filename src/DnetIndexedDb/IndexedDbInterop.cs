@@ -201,6 +201,66 @@ namespace DnetIndexedDb
             return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.getBlobByKey", _indexedDbDatabaseModel, objectStoreName, key);
         }
 
+        /// <summary>
+        /// Return a record in a given data store by its key
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="objectStoreName"></param>
+        /// <param name="destination"></param>
+        /// <param name="maxBytes"></param>
+        /// <returns></returns>
+        public async ValueTask<int> GetBlobByKey(string objectStoreName, string key, byte[] destination, int maxBytes)
+        {
+            //return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.getBlobByKey2", _indexedDbDatabaseModel, objectStoreName, key);
+            var unmarshalledRuntime = (IJSUnmarshalledRuntime)_jsRuntime;
+            var bytesReturned = new byte[4];
+            var getblob = new GetBlobStruct
+            {
+                DbModelGuid = _indexedDbDatabaseModel.DbModelGuid,
+                Destination = destination,
+                MaxBytes = maxBytes,
+                Key = key,
+                ObjectStoreName = objectStoreName,
+                BytesReturned = bytesReturned
+            };
+
+            var res= unmarshalledRuntime.InvokeUnmarshalled<GetBlobStruct, int>("dnetindexeddbinterop.getBlobByKey2", getblob);
+            // invoke umarshalled seems to return immediately, wait for result to get written
+            while (bytesReturned[0] == 0 && bytesReturned[1] == 0 && bytesReturned[2] == 0 && bytesReturned[3] == 0)
+            {
+                await Task.Delay(10);
+            }
+            if (BitConverter.IsLittleEndian) Array.Reverse(getblob.BytesReturned);
+            var br = BitConverter.ToInt32(getblob.BytesReturned, 0);
+            return br;
+        }
+
+
+
+
+        [StructLayout(LayoutKind.Explicit)]
+        private struct GetBlobStruct
+        {
+            [FieldOffset(0)]
+            public string DbModelGuid;
+
+            [FieldOffset(8)]
+            public string ObjectStoreName;
+
+            [FieldOffset(16)]
+            public string Key;
+
+            [FieldOffset(24)]
+            public byte[] Destination;
+
+            [FieldOffset(28)]
+            public int MaxBytes;
+
+            [FieldOffset(32)]
+            public byte[] BytesReturned;
+
+        }
+
 
         /// <summary>
         /// Directly references blob from html element without having to marshall it into .NET
