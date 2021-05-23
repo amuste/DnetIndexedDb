@@ -119,29 +119,7 @@ window.dnetindexeddbinterop = (function () {
         });
     }
 
-    function SyncFileReader(file) {
-        let self = this;
-        let ready = false;
-        let result = '';
-
-        const sleep = function (ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        self.readAsArrayBuffer = async function () {
-            while (ready === false) {
-                await sleep(25);
-            }
-            return result;
-        }
-
-        const reader = new FileReader();
-        reader.onloadend = function (evt) {
-            result = evt.target.result;
-            ready = true;
-        };
-        reader.readAsArrayBuffer(file);
-    }
+   
 
     function upgradeDb(currentDbVersion, stores, oldStores, transaction) {
 
@@ -1176,13 +1154,6 @@ window.dnetindexeddbinterop = (function () {
             });
         },
 
-    //// create blob from array
-    //const dataPtr = Blazor.platform.getArrayEntryPtr(item, 0, 4);
-    //const length = Blazor.platform.getArrayLength(item);
-    //var blob = new Blob([new Uint8Array(Module.HEAPU8.buffer, dataPtr, length)], { type: mimeType });
-
-    //return await addBlobItem(dbModel, objectStoreName, blob, key).pipe(Rx.operators.take(1)).toPromise();
-
         //// Faster version of above by writing into .net memory buffer. 
         ////
         //// See:
@@ -1193,12 +1164,10 @@ window.dnetindexeddbinterop = (function () {
         //// Unmarshalled invoke doesn't seem to have an async version, so return value synchronously
         ////
         getBlobByKey2: function (fields) {
-            console.log("calling async");
             var bytesReturned = Blazor.platform.readInt32Field(fields, 32);
             var bytesReturnedArray = Blazor.platform.toUint8Array(bytesReturned);
 
             return (async () => {
-                console.log("getBlobByKey2()");
                 const dbModelGuid = Blazor.platform.readStringField(fields, 0);
                 const objectStoreName = Blazor.platform.readStringField(fields, 8);
                 const key = Blazor.platform.readStringField(fields, 16);
@@ -1244,15 +1213,7 @@ window.dnetindexeddbinterop = (function () {
                 var arr = new Uint8Array(abuf);
                 console.log(arr);
                 bytesReturnedArray.set(arr, 0);// set bytes returned to -1 on error
-                // Deal with the fact the chain failed
             });
-            //return result;
-            //console.log(`result array first three bytes=${result[0]} ${result[1]} ${result[2]} `)
-            //var bytesToRead = Math.min(maxBytes, result.byteLength);
-            //var destinationUint8Array = Blazor.platform.toUint8Array(destination);
-            //destinationUint8Array.set(result, 0);
-            //console.log(`Dest array first three bytes=${destinationUint8Array[0]} ${destinationUint8Array[1]} ${destinationUint8Array[2]} `)
-            //return bytesToRead;
         },
         // Faster version of above by writing into .net memory buffer. 
         //

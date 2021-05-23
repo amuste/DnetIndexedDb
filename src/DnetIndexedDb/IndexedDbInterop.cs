@@ -206,6 +206,8 @@ namespace DnetIndexedDb
         /// </summary>
         /// <param name="key"></param>
         /// <param name="objectStoreName"></param>
+        /// <param name="destination"></param>
+        /// <param name="maxBytes"></param>
         /// <returns></returns>
         public async ValueTask<int> GetBlobByKey(string objectStoreName, string key, byte[] destination, int maxBytes)
         {
@@ -226,7 +228,7 @@ namespace DnetIndexedDb
             // invoke umarshalled seems to return immediately, wait for result to get written
             while (bytesReturned[0] == 0 && bytesReturned[1] == 0 && bytesReturned[2] == 0 && bytesReturned[3] == 0)
             {
-                await Task.Delay(25);
+                await Task.Delay(10);
             }
             if (BitConverter.IsLittleEndian) Array.Reverse(getblob.BytesReturned);
             var br = BitConverter.ToInt32(getblob.BytesReturned, 0);
