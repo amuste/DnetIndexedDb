@@ -130,7 +130,7 @@ window.dnetindexeddbinterop = (function () {
 
         self.readAsArrayBuffer = async function () {
             while (ready === false) {
-                await sleep(100);
+                await sleep(25);
             }
             return result;
         }

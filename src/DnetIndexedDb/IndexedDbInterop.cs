@@ -226,7 +226,7 @@ namespace DnetIndexedDb
             // invoke umarshalled seems to return immediately, wait for result to get written
             while (bytesReturned[0] == 0 && bytesReturned[1] == 0 && bytesReturned[2] == 0 && bytesReturned[3] == 0)
             {
-                await Task.Delay(100);
+                await Task.Delay(25);
             }
             if (BitConverter.IsLittleEndian) Array.Reverse(getblob.BytesReturned);
             var br = BitConverter.ToInt32(getblob.BytesReturned, 0);
