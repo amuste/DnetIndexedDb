@@ -530,12 +530,20 @@ OR
   var result = await BlobDb.AddBlobItem<byte[]>("StoreName", Blob,"image/jpeg", "myrecordkey1");
 ```
 
-### Get base 64 encoded blob from the store (slow!)
+### Get marshalled base 64 encoded blob from the store (slow!)
 
 ```ValueTask<string> GetBlobByKey(string objectStoreName, key)```
 
 ```CSharp
   var result = await BlobDb.GetBlobByKey("StoreName", Blob,"image/jpeg", "myrecordkey1");
+```
+
+### Get unmarshalled blob from the store int .net buffer (fast)
+
+```ValueTask<string> GetBlobByKey(string objectStoreName, key, byte[] destination, int maxBytes)```
+
+```CSharp
+  var result = await BlobDb.GetBlobByKey("StoreName", Blob,"image/jpeg", "myrecordkey1", mybuffer, mybuffermaxsize);
 ```
 
 ### Assign blob directly to HTML element without marshalling into .NET (fast)
