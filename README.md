@@ -535,7 +535,7 @@ OR
 ```ValueTask<string> GetBlobByKey(string objectStoreName, key)```
 
 ```CSharp
-  var result = await BlobDb.GetBlobByKey("StoreName", Blob,"image/jpeg", "myrecordkey1");
+  var result = await BlobDb.GetBlobByKey("StoreName", "myrecordkey1");
 ```
 
 ### Get unmarshalled blob from the store int .net buffer (fast)
@@ -543,7 +543,7 @@ OR
 ```ValueTask<string> GetBlobByKey(string objectStoreName, key, byte[] destination, int maxBytes)```
 
 ```CSharp
-  var result = await BlobDb.GetBlobByKey("StoreName", Blob,"image/jpeg", "myrecordkey1", mybuffer, mybuffermaxsize);
+  var result = await BlobDb.GetBlobByKey("StoreName", "myrecordkey1", mybuffer, mybuffermaxsize);
 ```
 
 ### Assign blob directly to HTML element without marshalling into .NET (fast)
