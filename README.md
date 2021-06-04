@@ -562,3 +562,11 @@ OR
   var result = await BlobDb.AssignBlobToElement("StoreName", "myrecordkey1", "myimagetagId","src");
 ```
 
+### Update blob directly from HTML element without marshalling into .NET (fast)
+
+```ValueTask<string> UpdateBlobFromElement(string objectStoreName, string key, string elementId, string attribute)```
+
+```CSharp
+  var result = await BlobDb.UpdateBlobFromElement("StoreName", "myrecordkey1", "myimagetagId","src");
+```
+

@@ -318,7 +318,7 @@ window.dnetindexeddbinterop = (function () {
 
 
     function updateBlobItem(dbModel, objectStoreName, data, key = null) {
-
+        //console.log("Updating blob item");
         return Rx.Observable.create((observer) => {
 
             if (dbModel.instance === null) {
@@ -334,7 +334,7 @@ window.dnetindexeddbinterop = (function () {
                 };
 
                 const onComplete = (event) => {
-                    observer.next(indexedDbMessages.DB_DATA_ADDED);
+                    observer.next(indexedDbMessages.DB_DATA_UPDATED);
                     observer.complete();
                 };
 
@@ -342,7 +342,8 @@ window.dnetindexeddbinterop = (function () {
 
                 const update = (item, key) => {
 
-                    return new Rx.Observable((addReqObserver) => {
+                    //console.log("In update");
+                    return new Rx.Observable((updateReqObserver) => {
 
                         const store = dbModel.stores.find(p => p.name === objectStoreName);
 
@@ -350,15 +351,18 @@ window.dnetindexeddbinterop = (function () {
 
                         if (keyPath !== "" && dbModel.useKeyGenerator) delete item[keyPath];
 
+                        //console.log("calling update");
                         const updateRequest = objectStore.put(item, key);
 
                         const onRequestError = (error) => {
-                            addReqObserver.error(indexedDbMessages.DB_DATA_ADD_ERROR);
+                            //console.log("update error");
+                            updateReqObserver.error(indexedDbMessages.DB_DATA_UPDATE_ERROR);
                         };
 
                         const onSuccess = (event) => {
-                            addReqObserver.next(event);
-                            addReqObserver.complete();
+                            //console.log("update ");
+                            updateReqObserver.next(event);
+                            updateReqObserver.complete();
                         };
 
                         updateRequest.addEventListener(eventTypes.success, onSuccess);
@@ -374,7 +378,7 @@ window.dnetindexeddbinterop = (function () {
 
                 transaction.addEventListener(eventTypes.error, onTransactionError);
                 transaction.addEventListener(eventTypes.complete, onComplete);
-
+                //console.log("Calling update");
                 const updateRequestSubscriber = update(data, key)
                     .subscribe(() => { }, (error) => { observer.error(error); });
 
@@ -1223,6 +1227,21 @@ window.dnetindexeddbinterop = (function () {
             var el = document.getElementById(elementId);
             var url=URL.createObjectURL(res);
             el.setAttribute(attribute, url);
+        },
+
+        updateBlobFromElement: async function (indexedDbDatabaseModel, objectStoreName, key, elementId, attribute) {
+            var el = document.getElementById(elementId);
+            var src = el.getAttribute(attribute)
+            var blob = await fetch(src)
+                .then(res => {
+                    return res.blob();
+                });
+                //.then(blob => {
+                //    console.log(blob);
+                //    return blob;
+                //});
+            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+            await updateBlobItem(dbModel, objectStoreName, blob, key).pipe(Rx.operators.take(1)).toPromise();
         },
 
         // This is really slow since it has to base64 encode anything going back to blazor.

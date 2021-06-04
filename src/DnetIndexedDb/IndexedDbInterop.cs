@@ -301,6 +301,21 @@ namespace DnetIndexedDb
 
 
         /// <summary>
+        /// Directly updates blob from html element without having to marshall it into .NET
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <param name="key"></param>
+        /// <param name="elementId"></param>
+        /// <param name="attribute"></param>
+        /// <returns></returns>
+        public async ValueTask<string> UpdateBlobFromElement(string objectStoreName, string key, string elementId, string attribute)
+        {
+            return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.updateBlobFromElement", _indexedDbDatabaseModel, objectStoreName, key, elementId, attribute);
+        }
+
+
+        /// <summary>
         /// Return a record in a data store matching TEntity.Name by key
         /// </summary>
         /// <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
