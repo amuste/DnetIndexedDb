@@ -317,6 +317,79 @@ window.dnetindexeddbinterop = (function () {
     }
 
 
+    function updateBlobItem(dbModel, objectStoreName, data, key = null) {
+
+        return Rx.Observable.create((observer) => {
+
+            if (dbModel.instance === null) {
+
+                observer.error(indexedDbMessages.DB_CLOSE);
+
+            } else {
+
+                const transaction = dbModel.instance.transaction([objectStoreName], transactionTypes.readwrite);
+
+                const onTransactionError = (error) => {
+                    observer.error(indexedDbMessages.DB_TRANSACTION_ERROR);
+                };
+
+                const onComplete = (event) => {
+                    observer.next(indexedDbMessages.DB_DATA_ADDED);
+                    observer.complete();
+                };
+
+                const objectStore = transaction.objectStore(objectStoreName);
+
+                const update = (item, key) => {
+
+                    return new Rx.Observable((addReqObserver) => {
+
+                        const store = dbModel.stores.find(p => p.name === objectStoreName);
+
+                        const keyPath = store.key.keyPath;
+
+                        if (keyPath !== "" && dbModel.useKeyGenerator) delete item[keyPath];
+
+                        const updateRequest = objectStore.put(item, key);
+
+                        const onRequestError = (error) => {
+                            addReqObserver.error(indexedDbMessages.DB_DATA_ADD_ERROR);
+                        };
+
+                        const onSuccess = (event) => {
+                            addReqObserver.next(event);
+                            addReqObserver.complete();
+                        };
+
+                        updateRequest.addEventListener(eventTypes.success, onSuccess);
+                        updateRequest.addEventListener(eventTypes.error, onRequestError);
+
+                        return () => {
+                            updateRequest.removeEventListener(eventTypes.success, onSuccess);
+                            updateRequest.removeEventListener(eventTypes.error, onRequestError);
+                        };
+
+                    });
+                };
+
+                transaction.addEventListener(eventTypes.error, onTransactionError);
+                transaction.addEventListener(eventTypes.complete, onComplete);
+
+                const updateRequestSubscriber = update(data, key)
+                    .subscribe(() => { }, (error) => { observer.error(error); });
+
+                return () => {
+                    transaction.removeEventListener(eventTypes.complete, onComplete);
+                    transaction.removeEventListener(eventTypes.error, onTransactionError);
+                    updateRequestSubscriber.unsubscribe();
+                };
+
+            }
+        });
+    }
+
+
+
     function addItems(dbModel, objectStoreName, data, concurrentTranscations = 20) {
 
         return Rx.Observable.create((observer) => {
@@ -1103,6 +1176,24 @@ window.dnetindexeddbinterop = (function () {
             var blob = new Blob([new Uint8Array(Module.HEAPU8.buffer, dataPtr, length)], { type: mimeType });
 
             return await addBlobItem(dbModel, objectStoreName, blob, key).pipe(Rx.operators.take(1)).toPromise();
+        },
+
+        updateBlobItem: async function (fields, item) {
+            // extract unmarshalled fields from struct
+            const dbModelGuid = Blazor.platform.readStringField(fields, 0);
+            const objectStoreName = Blazor.platform.readStringField(fields, 8);
+            let key = Blazor.platform.readStringField(fields, 16);
+            const mimeType = Blazor.platform.readStringField(fields, 24);
+            console.log(`Updating file with mime type ${mimeType}`);
+            if (key === "") key = null;
+            const dbModel = getDbModel(dbModelGuid).dbModel;
+
+            // create blob from array
+            const dataPtr = Blazor.platform.getArrayEntryPtr(item, 0, 4);
+            const length = Blazor.platform.getArrayLength(item);
+            var blob = new Blob([new Uint8Array(Module.HEAPU8.buffer, dataPtr, length)], { type: mimeType });
+
+            return await updateBlobItem(dbModel, objectStoreName, blob, key).pipe(Rx.operators.take(1)).toPromise();
         },
 
         addItems: async function (indexedDbDatabaseModel, objectStoreName, items) {

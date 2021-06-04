@@ -226,6 +226,13 @@
             sw.Restart();
             string blob = await BlobDb.GetBlobByKey("BlobStore", "firstrecord");
             Messages.Add($"Got blob using marshalling in {sw.ElapsedMilliseconds}ms ");
+            StateHasChanged();
+            await Task.Delay(1);
+            sw.Restart();
+            var db1Result2 = BlobDb.UpdateBlobByKey<byte[]>("BlobStore", Blob, "image/jpeg", "firstrecord");
+            Messages.Add($"Updated Blob in {sw.ElapsedMilliseconds}ms ");
+
+
         }
     }
 

@@ -191,6 +191,29 @@ namespace DnetIndexedDb
 
 
         /// <summary>
+        /// Add records to a given data store
+        /// </summary>
+        /// <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <param name="item"></param>
+        /// <param name="key"></param>
+        /// <param name="mimeType"></param>
+        /// <returns></returns>
+        public string UpdateBlobByKey<TEntity>(string objectStoreName, TEntity item, string mimeType, string key)
+        {
+            var addblob = new AddBlobStruct
+            {
+                DbModelGuid = _indexedDbDatabaseModel.DbModelGuid,
+                objectStoreName = objectStoreName,
+                key = key,
+                mimeType = mimeType
+            };
+            var unmarshalledRuntime = (IJSUnmarshalledRuntime)_jsRuntime;
+            return unmarshalledRuntime.InvokeUnmarshalled<AddBlobStruct, TEntity, string>("dnetindexeddbinterop.updateBlobItem", addblob, item);
+        }
+
+
+        /// <summary>
         /// Return a record in a given data store by its key
         /// </summary>
         /// <param name="key"></param>
