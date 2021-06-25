@@ -12,7 +12,7 @@
     <PackageTags>Blazor IndexedDB Datalnet</PackageTags>
     <Copyright>Copyright 2020 (c) Datalnet. All rights reserved.</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.3.0</Version>
+    <Version>2.3.2</Version>
     <PackageReleaseNotes>Fluent Extensions for Database Creation
 Add Min/Max Extent Searching for Key and Index Fields</PackageReleaseNotes>
   </PropertyGroup>

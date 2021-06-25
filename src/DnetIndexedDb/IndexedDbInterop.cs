@@ -4,6 +4,9 @@ using Microsoft.JSInterop;
 using System.Threading.Tasks;
 using DnetIndexedDb.Models;
 using System.Text.Json;
+using System.Diagnostics;
+using System.Text;
+using System.Runtime.InteropServices;
 
 namespace DnetIndexedDb
 {
@@ -62,6 +65,44 @@ namespace DnetIndexedDb
         public async ValueTask<string> DeleteIndexedDb()
         {
             return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.deleteDb", _indexedDbDatabaseModel);
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        private struct AddBlobStruct
+        {
+            [FieldOffset(0)]
+            public string DbModelGuid;
+
+            [FieldOffset(8)]
+            public string objectStoreName;
+
+            [FieldOffset(16)]
+            public string key;
+
+            [FieldOffset(24)]
+            public string mimeType;
+        }
+
+        /// <summary>
+        /// Add records to a given data store
+        /// </summary>
+        /// <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <param name="item"></param>
+        /// <param name="key"></param>
+        /// <param name="mimeType"></param>
+        /// <returns></returns>
+        public string AddBlobItem<TEntity>(string objectStoreName, TEntity item, string mimeType, string key = "")
+        {
+            var addblob = new AddBlobStruct
+            {
+                DbModelGuid = _indexedDbDatabaseModel.DbModelGuid,
+                objectStoreName = objectStoreName,
+                key = key,
+                mimeType = mimeType
+            };
+            var unmarshalledRuntime = (IJSUnmarshalledRuntime)_jsRuntime;
+            return unmarshalledRuntime.InvokeUnmarshalled<AddBlobStruct, TEntity, string> ("dnetindexeddbinterop.addBlobItem", addblob, item);
         }
 
         /// <summary>
@@ -147,6 +188,132 @@ namespace DnetIndexedDb
         {
             return await _jsRuntime.InvokeAsync<TEntity>("dnetindexeddbinterop.getByKey", _indexedDbDatabaseModel, objectStoreName, key);
         }
+
+
+        /// <summary>
+        /// Add records to a given data store
+        /// </summary>
+        /// <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <param name="item"></param>
+        /// <param name="key"></param>
+        /// <param name="mimeType"></param>
+        /// <returns></returns>
+        public string UpdateBlobByKey<TEntity>(string objectStoreName, TEntity item, string mimeType, string key)
+        {
+            var addblob = new AddBlobStruct
+            {
+                DbModelGuid = _indexedDbDatabaseModel.DbModelGuid,
+                objectStoreName = objectStoreName,
+                key = key,
+                mimeType = mimeType
+            };
+            var unmarshalledRuntime = (IJSUnmarshalledRuntime)_jsRuntime;
+            return unmarshalledRuntime.InvokeUnmarshalled<AddBlobStruct, TEntity, string>("dnetindexeddbinterop.updateBlobItem", addblob, item);
+        }
+
+
+        /// <summary>
+        /// Return a record in a given data store by its key
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="objectStoreName"></param>
+        /// <returns></returns>
+        public async ValueTask<string> GetBlobByKey(string objectStoreName, string key)
+        {
+            return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.getBlobByKey", _indexedDbDatabaseModel, objectStoreName, key);
+        }
+
+        /// <summary>
+        /// Return a record in a given data store by its key
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="objectStoreName"></param>
+        /// <param name="destination"></param>
+        /// <param name="maxBytes"></param>
+        /// <returns></returns>
+        public async ValueTask<int> GetBlobByKey(string objectStoreName, string key, byte[] destination, int maxBytes)
+        {
+            //return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.getBlobByKey2", _indexedDbDatabaseModel, objectStoreName, key);
+            var unmarshalledRuntime = (IJSUnmarshalledRuntime)_jsRuntime;
+            var bytesReturned = new byte[4];
+            var getblob = new GetBlobStruct
+            {
+                DbModelGuid = _indexedDbDatabaseModel.DbModelGuid,
+                Destination = destination,
+                MaxBytes = maxBytes,
+                Key = key,
+                ObjectStoreName = objectStoreName,
+                BytesReturned = bytesReturned
+            };
+
+            var res= unmarshalledRuntime.InvokeUnmarshalled<GetBlobStruct, int>("dnetindexeddbinterop.getBlobByKey2", getblob);
+            // invoke umarshalled seems to return immediately, wait for result to get written
+            while (bytesReturned[0] == 0 && bytesReturned[1] == 0 && bytesReturned[2] == 0 && bytesReturned[3] == 0)
+            {
+                await Task.Delay(10);
+            }
+            if (BitConverter.IsLittleEndian) Array.Reverse(getblob.BytesReturned);
+            var br = BitConverter.ToInt32(getblob.BytesReturned, 0);
+            return br;
+        }
+
+
+
+
+        [StructLayout(LayoutKind.Explicit)]
+        private struct GetBlobStruct
+        {
+            [FieldOffset(0)]
+            public string DbModelGuid;
+
+            [FieldOffset(8)]
+            public string ObjectStoreName;
+
+            [FieldOffset(16)]
+            public string Key;
+
+            [FieldOffset(24)]
+            public byte[] Destination;
+
+            [FieldOffset(28)]
+            public int MaxBytes;
+
+            [FieldOffset(32)]
+            public byte[] BytesReturned;
+
+        }
+
+
+        /// <summary>
+        /// Directly references blob from html element without having to marshall it into .NET
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <param name="key"></param>
+        /// <param name="elementId"></param>
+        /// <param name="attribute"></param>
+        /// <returns></returns>
+        public async ValueTask<string> AssignBlobToElement(string objectStoreName, string key, string elementId, string attribute)
+        {
+            return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.assignBlobToElement", _indexedDbDatabaseModel, objectStoreName, key, elementId, attribute);
+        }
+
+
+        /// <summary>
+        /// Directly updates blob from html element without having to marshall it into .NET
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="objectStoreName"></param>
+        /// <param name="key"></param>
+        /// <param name="elementId"></param>
+        /// <param name="attribute"></param>
+        /// <returns></returns>
+        public async ValueTask<string> UpdateBlobFromElement(string objectStoreName, string key, string elementId, string attribute)
+        {
+            return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.updateBlobFromElement", _indexedDbDatabaseModel, objectStoreName, key, elementId, attribute);
+        }
+
 
         /// <summary>
         /// Return a record in a data store matching TEntity.Name by key

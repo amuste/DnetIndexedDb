@@ -520,4 +520,53 @@ OR
   var result = await GridColumnDataIndexedDb.DeleteIndexedDb();
 ```
  
- 
+## Blobs
+
+### Add a binary blob to the store
+
+```string AddBlobItem<TEntity>(string objectStoreName, TEntity item, string mimeType, string key = "")```
+
+```CSharp
+  var result = await BlobDb.AddBlobItem<byte[]>("StoreName", Blob,"image/jpeg", "myrecordkey1");
+```
+
+### Update binary blob in the store
+
+```string UpdateBlobByKey<TEntity>(string objectStoreName, TEntity item, string mimeType, string key)```
+
+```CSharp
+  var result = BlobDb.UpdateBlobByKey<byte[]>("StoreName", Blob, "image/png", "myrecordkey1");
+```
+
+### Get marshalled base 64 encoded blob from the store (slow!)
+
+```ValueTask<string> GetBlobByKey(string objectStoreName, key)```
+
+```CSharp
+  var result = await BlobDb.GetBlobByKey("StoreName", "myrecordkey1");
+```
+
+### Get unmarshalled blob from the store int .net buffer (fast)
+
+```ValueTask<string> GetBlobByKey(string objectStoreName, key, byte[] destination, int maxBytes)```
+
+```CSharp
+  var result = await BlobDb.GetBlobByKey("StoreName", "myrecordkey1", mybuffer, mybuffermaxsize);
+```
+
+### Assign blob directly to HTML element without marshalling into .NET (fast)
+
+```ValueTask<string> AssignBlobToElement(string objectStoreName, string key, string elementId, string attribute)```
+
+```CSharp
+  var result = await BlobDb.AssignBlobToElement("StoreName", "myrecordkey1", "myimagetagId","src");
+```
+
+### Update blob directly from HTML element without marshalling into .NET (fast)
+
+```ValueTask<string> UpdateBlobFromElement(string objectStoreName, string key, string elementId, string attribute)```
+
+```CSharp
+  var result = await BlobDb.UpdateBlobFromElement("StoreName", "myrecordkey1", "myimagetagId","src");
+```
+
