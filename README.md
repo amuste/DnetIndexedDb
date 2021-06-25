@@ -18,18 +18,29 @@ The actual API expose the following methods:
 * Retrieve an items by index
 * Retrieve a range of items by key
 * Retrieve a range of items by index
+* Retrieve max key value
+* Retrieve max index value
+* Retrieve minimum key value
+* Retrieve minimum index value
 
 Compatibility
 *Server-side Blazor and client-side Blazor
 
 ## Using the library
 
+### Installation
+
 1. Install the Nuget package DnetIndexedDb
-2. Add the following script reference to your Index.html after the blazor.webassembly.js reference: 
-```<script src="_content/DnetIndexedDb/rxjs.min.js"></script>```
-```<script src="_content/DnetIndexedDb/dnet-indexeddb.js"></script>```
-2. create a new instance of ```IndexedDbDatabaseModel```
-3. Create a derive class from ```IndexedDbInterop```
+2. Add the following script reference to your Index.html after the blazor.webassembly.js or blazor.server.js reference: 
+
+```Html
+<script src="_content/DnetIndexedDb/rxjs.min.js"></script>
+<script src="_content/DnetIndexedDb/dnet-indexeddb.js"></script>
+```
+
+3. Create a derived class from ```IndexedDbInterop```.  
+   a. This is the class you will use to interact with IndexedDb JavaScript for this database
+
 ```CSharp
   public class GridColumnDataIndexedDb : IndexedDbInterop
   {
@@ -39,41 +50,43 @@ Compatibility
     }
   }
 ```
-5. Register your derive class in ```ConfiguredServices``` on ```Startup.cs```. When register use options to add the IndexedDbDatabaseModel instance.
+
+5. Create a new instance of ```IndexedDbDatabaseModel```.  
+Configure this using one of the options in the next section.
+4. Register your derived class in ```ConfiguredServices``` in ```Startup.cs```.  
+When registering, use options to add the `IndexedDbDatabaseModel` instance.
+
 ```CSharp
   services.AddIndexedDbDatabase<GridColumnDataIndexedDb>(options =>
   {
     options.UseDatabase(GetGridColumnDatabaseModel());
   });
 ```
+
 6. Inject the created instance of your derived class into the component or page.
 
 
 ### Detailed configuration and use
 
 #### Step 1 - Create the database model
-To create the database model use the following classes. You can find more info about the IndexedDB database here: https://www.w3.org/TR/IndexedDB-2/#database-construct
+To configure the database model, use the following classes. You can find more info about the IndexedDB database here: https://www.w3.org/TR/IndexedDB-2/#database-construct
 
-```IndexedDbDatabase```
-```IndexedDbDatabaseModel```
-```IndexedDbIndex```
+```IndexedDbDatabaseModel``` 
 ```IndexedDbStore```
-```IndexedDbStoreParameter```
+```IndexedDbIndex``` 
+```IndexedDbStoreParameter``` 
 
-See the examples below:
 ```CSharp
     public class IndexedDbDatabaseModel
-    {
-      
-        public string Name { get; set; }
-     
-        public int Version { get; set; }
-      
+    {      
+        public string Name { get; set; }     
+        public int Version { get; set; }      
         public List<IndexedDbStore> Stores { get; set; } = new List<IndexedDbStore>();
-
         public int DbModelId { get; set; }
     }
 ```
+
+##### Manual Configuration
 
 ```CSharp
  var indexedDbDatabaseModel = new IndexedDbDatabaseModel
@@ -178,73 +191,10 @@ See the examples below:
             };
 ```
 
-##### Create database model by @Kylar182
+##### Fluent Manual Configuration
 
-```CSharp
-    public class TableFieldDatabase : IndexedDbDatabaseModel
-    {
-        public TableFieldDatabase()
-        {
-            Name = "GridColumnData";
-            Version = 1;
-            Stores = _stores;
-        }
-
-        /// <summary>
-        /// List of Object Stores
-        /// </summary>
-        private List<IndexedDbStore> _stores => new List<IndexedDbStore>
-        {
-            _tableFieldStore,
-        };
-
-        private IndexedDbStore _tableFieldStore => new TStore<TableFieldDto>();
-    }
-    
-    public class TStore<T> : IndexedDbStore where T : class
-    {
-        private IndexedDbStoreParameter _key;
-
-        private readonly List<IndexedDbIndex> _indexes = new List<IndexedDbIndex>();
-
-        public TStore()
-        {
-            BuildStore();
-            Name = typeof(T).Name.ToPlural();
-            Key = _key;
-            Indexes = _indexes;
-        }
-
-        private void BuildStore()
-        {
-            foreach (PropertyInfo info in typeof(T).GetProperties())
-            {
-                var classId = info.Name.Substring(info.Name.Length - 2);
-
-                var classAttrs = info.GetCustomAttributes(true);
-
-                var keyAttr = classAttrs.Select(p => p as KeyAttribute).FirstOrDefault();
-
-                if (classId == "Id" || keyAttr != null)
-                {
-                    _key = new IndexedDbStoreParameter
-                    {
-                        KeyPath = info.Name.ToCamelCase(),
-                        AutoIncrement = true
-                    };
-                }
-
-                _indexes.Add(new IndexedDbIndex
-                {
-                    Name = info.Name.ToCamelCase(),
-                    Definition = new IndexedDbIndexParameter { Unique = false }
-                });
-            }
-        }
-    }
-```
-
-##### Fluent DbModel Definition
+Fluent-based Extension methods to make the configuration of the database simplier.
+It will create the same model as manual configuration but in a more concise syntax.
 
 ```CSharp
 using DnetIndexedDb.Fluent;
@@ -271,6 +221,45 @@ using DnetIndexedDb.Fluent;
 
         options.UseDatabase(model);
     });
+```
+
+##### Configure From Class Attributes by @Kylar182
+
+`[IndexDbKey]` and `[IndexDbIndex]` Property Attributes can be used to configure the database based on the given class.  
+A DataStore will be created matching the name of the class.
+
+```CSharp
+    public class TableFieldDto
+    {
+        [IndexDbKey(AutoIncrement = true)]
+        public int? TableFieldId { get; set; }
+        [IndexDbIndex]
+        public string TableName { get; set; }
+        [IndexDbIndex]
+        public string FieldVisualName { get; set; }
+        [IndexDbIndex]
+        public string AttachedProperty { get; set; }
+        [IndexDbIndex]
+        public bool IsLink { get; set; }
+        [IndexDbIndex]
+        public int MemberOf { get; set; }
+        [IndexDbIndex]
+        public int Width { get; set; }
+        [IndexDbIndex]
+        public string TextAlignClass { get; set; }
+        [IndexDbIndex]
+        public bool Hide { get; set; }
+        [IndexDbIndex]
+        public string Type { get; set; }
+    }
+
+...
+
+    var indexedDbDatabaseModel = new IndexedDbDatabaseModel()
+        .WithName("TestAttributes")
+        .WithVersion(1);
+
+    indexedDbDatabaseModel.AddStore<TableFieldDto>();
 ```
 
 #### Step 2 - Creating a service
@@ -322,29 +311,26 @@ IndexedDB store are the equivalent of table in SQL Database. For the API demostr
     public class TableFieldDto
     {
         public int TableFieldId { get; set; }
-
         public string TableName { get; set; }
-
         public string FieldVisualName { get; set; }
-
         public string AttachedProperty { get; set; }
-
         public bool IsLink { get; set; }
-
         public int MemberOf { get; set; }
-
         public int Width { get; set; }
-
         public string TextAlignClass { get; set; }
-
         public bool Hide { get; set; }
-
         public string Type { get; set; }
     }
 ```
 
 
-### API examples
+## API examples
+
+The following examples have two overloads of each DataStore level function.
+
+The first is used when you need to manually specify the DataStore name and the store name does not match the Class Name.
+
+The second is used when the Class name and DataStore name match, such as when using the Class Attribute based configuration.
 
 ### Open and upgrade an instance of IndexedDB
 
@@ -358,68 +344,172 @@ IndexedDB store are the equivalent of table in SQL Database. For the API demostr
 
 ```ValueTask<TEntity> AddItems<TEntity>(string objectStoreName, List<TEntity> items)```
 
+```ValueTask<TEntity> AddItems<TEntity>(List<TEntity> items)```
+
 ```CSharp
+// Manually set DataStore name
  var result = await GridColumnDataIndexedDb.AddItems<TableFieldDto>("tableField", items);
+OR
+// DataStore name inferred from class 
+ var result = await GridColumnDataIndexedDb.AddItems<TableFieldDto>(items);
 ```
 
 ### Retrieve an item by key
 
 ```ValueTask<TEntity> GetByKey<TKey, TEntity>(string objectStoreName, TKey key)```
 
+```ValueTask<TEntity> GetByKey<TKey, TEntity>(TKey key)```
+
 ```CSharp
+// Manually set DataStore name
  var result = await GridColumnDataIndexedDb.GetByKey<int, TableFieldDto>("tableField", 11);
+OR
+// DataStore name inferred from class 
+ var result = await GridColumnDataIndexedDb.GetByKey<int, TableFieldDto>(11);
 ```
 
 ### Delete an item from a store by key
 
 ```ValueTask<string> DeleteByKey<TKey>(string objectStoreName, TKey key)```
 
+```ValueTask<string> DeleteByKey<TKey, TEntity>(TKey key)```
+
 ```CSharp
+// Manually set DataStore name
  var result = await GridColumnDataIndexedDb.DeleteByKey<int>("tableField", 11);
+OR
+// DataStore name inferred from class 
+ var result = await GridColumnDataIndexedDb.DeleteByKey<int, TableFieldDto>(11);
 ```
 
 ### Retrieve all items from a given store
 
 ```ValueTask<List<TEntity>> GetAll<TEntity>(string objectStoreName)```
 
+```ValueTask<List<TEntity>> GetAll<TEntity>()```
+
 ```CSharp
+// Manually set DataStore name
   var result = await GridColumnDataIndexedDb.GetAll<TableFieldDto>("tableField");
+OR
+// DataStore name inferred from class 
+  var result = await GridColumnDataIndexedDb.GetAll<TableFieldDto>();
 ```
 
 ### Retrieve a range of items by key
 
 ```ValueTask<List<TEntity>> GetRange<TKey, TEntity>(string objectStoreName, TKey lowerBound, TKey upperBound)```
 
+```ValueTask<List<TEntity>> GetRange<TKey, TEntity>(TKey lowerBound, TKey upperBound)```
+
 ```CSharp
+// Manually set DataStore name
    var result = await GridColumnDataIndexedDb.GetRange<int, TableFieldDto>("tableField", 15, 20);
+OR
+// DataStore name inferred from class 
+   var result = await GridColumnDataIndexedDb.GetRange<int, TableFieldDto>(15, 20);
 ```
 
 ### Retrieve a range of items by index
 
 ```ValueTask<List<TEntity>> GetByIndex<TKey, TEntity>(string objectStoreName, TKey lowerBound, TKey upperBound, string dbIndex, bool isRange)```
 
+```ValueTask<List<TEntity>> GetByIndex<TKey, TEntity>(TKey lowerBound, TKey upperBound, string dbIndex, bool isRange)```
+
 ```CSharp
+// Manually set DataStore name
     var result = await GridColumnDataIndexedDb.GetByIndex<string, TableFieldDto>("tableField", "Name", null, "fieldVisualName", false);
+OR
+// DataStore name inferred from class 
+    var result = await GridColumnDataIndexedDb.GetByIndex<string, TableFieldDto>("Name", null, "fieldVisualName", false);
+```
+
+### Retrieve Max Key
+
+```ValueTask<TKey> GetMaxKey<TKey>(string objectStoreName)```
+
+```ValueTask<TKey> GetMaxKey<TKey, TEntity>()```
+
+```CSharp
+// Manually set DataStore name
+    var result = await GridColumnDataIndexedDb.GetMaxKey<string>("tableField");
+OR
+// DataStore name inferred from class 
+    var result = await GridColumnDataIndexedDb.GetMaxKey<string, TableFieldDto>();
+```
+
+### Retrieve Minimum Key
+
+```ValueTask<TKey> GetMinKey<TKey>(string objectStoreName)```
+
+```ValueTask<TKey> GetMinKey<TKey, TEntity>()```
+
+```CSharp
+// Manually set DataStore name
+    var result = await GridColumnDataIndexedDb.GetMinKey<string>("tableField");
+OR
+// DataStore name inferred from class 
+    var result = await GridColumnDataIndexedDb.GetMinKey<string, TableFieldDto>();
+```
+
+### Retrieve Max value by index
+
+```ValueTask<TIndex> GetMaxIndex<TIndex>(string objectStoreName, string dbIndex)```
+
+```ValueTask<TIndex> GetMaxIndex<TIndex, TEntity>(string dbIndex)```
+
+```CSharp
+// Manually set DataStore name
+    var result = await GridColumnDataIndexedDb.GetMaxIndex<string>("tableField", "fieldVisualName");
+OR
+// DataStore name inferred from class 
+    var result = await GridColumnDataIndexedDb.GetMaxIndex<string, TableFieldDto>("fieldVisualName");
+```
+
+### Retrieve Minimum value by index
+
+```ValueTask<TIndex> GetMinIndex<TIndex>(string objectStoreName, string dbIndex)```
+
+```ValueTask<TIndex> GetMinIndex<TIndex, TEntity>(string dbIndex)```
+
+```CSharp
+// Manually set DataStore name
+    var result = await GridColumnDataIndexedDb.GetMinIndex<string>("tableField", "fieldVisualName");
+OR
+// DataStore name inferred from class 
+    var result = await GridColumnDataIndexedDb.GetMinIndex<string, TableFieldDto>("fieldVisualName");
 ```
 
 ### Update items in a given store
 
 ```ValueTask<string> UpdateItems<TEntity>(string objectStoreName, List<TEntity> items)```
 
+```ValueTask<string> UpdateItems<TEntity>(List<TEntity> items)```
+
 ```CSharp
     foreach (var item in items)
     {
         item.FieldVisualName = item.FieldVisualName + "Updated";
     }
+    // Manually set DataStore name
    var result = await GridColumnDataIndexedDb.UpdateItems<TableFieldDto>("tableField", items);
+OR
+// DataStore name inferred from class    
+   var result = await GridColumnDataIndexedDb.UpdateItems<TableFieldDto>(items);
 ```
 
 ### Delete all items from a store
 
 ```ValueTask<string> DeleteAll(string objectStoreName)```
 
+```ValueTask<string> DeleteAll<TEntity>()```
+
 ```CSharp
+// Manually set DataStore name
   var result = await GridColumnDataIndexedDb.DeleteAll("tableField");
+OR
+// DataStore name inferred from class 
+  var result = await GridColumnDataIndexedDb.DeleteAll<TableFieldDto>();
 ```
 
 ### Delete an instance of IndexedDB

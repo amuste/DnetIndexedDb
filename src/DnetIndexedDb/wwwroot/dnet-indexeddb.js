@@ -928,6 +928,8 @@ window.dnetindexeddbinterop = (function () {
                 const getKeyOrIndexExtent = () => {
                     return new Rx.Observable((getReqObserver) => {
 
+                        let cursorRequest = null;
+
                         if (dbIndex) {
                             // Search By Index
                             const index = objectStore.index(dbIndex);

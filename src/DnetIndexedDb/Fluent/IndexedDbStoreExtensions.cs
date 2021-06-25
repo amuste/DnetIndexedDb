@@ -1,5 +1,7 @@
 ﻿using DnetIndexedDb.Models;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 
 namespace DnetIndexedDb.Fluent
 {
@@ -27,7 +29,7 @@ namespace DnetIndexedDb.Fluent
         /// <returns>Given IndexedDbStore Instance</returns>
         public static IndexedDbStore WithAutoIncrementingKey(this IndexedDbStore store, string name)
         {
-            return store.CreateKey(name, autoIncrement:true);
+            return store.CreateKey(name, autoIncrement: true);
         }
 
         private static IndexedDbStore CreateKey(this IndexedDbStore store, string name, bool autoIncrement)
@@ -81,13 +83,51 @@ namespace DnetIndexedDb.Fluent
             return store;
         }
 
-        public static string ToCamelCase(this string str)
+        private static string ToCamelCase(this string str)
         {
             if (!string.IsNullOrEmpty(str) && str.Length > 1)
             {
                 return char.ToLowerInvariant(str[0]) + str.Substring(1);
             }
             return str;
+        }
+
+        /// <summary>
+        /// Adds Key and Indexes to Store based on IndexedDbKey and IndexedDbIndex Attributes on properties in Type T
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="store"></param>
+        /// <returns></returns>
+        public static IndexedDbStore SetupFrom<T>(this IndexedDbStore store)
+        {
+            store.Indexes = null;
+
+            var type = typeof(T);
+            var props = type.GetProperties();
+
+            foreach (var prop in props)
+            {
+                var keyAttribute = prop.GetCustomAttribute<IndexDbKeyAttribute>();
+                var indexAttribute = prop.GetCustomAttribute<IndexDbIndexAttribute>();
+
+                if (keyAttribute is not null)
+                {
+                    store.CreateKey(prop.Name, keyAttribute.AutoIncrement);
+                    store.CreateIndex(prop.Name, new IndexedDbIndexParameter() { Unique = keyAttribute.Unique });
+                }
+
+                if (indexAttribute is not null)
+                {
+                    store.CreateIndex(prop.Name, new IndexedDbIndexParameter() { Unique = indexAttribute.Unique });
+                }
+            }
+
+            if(store.Key == null)
+            {
+                throw new System.Exception($"No IndexDbKey Found on Property Attributes in Class {type.Name}");
+            }
+
+            return store;
         }
     }
 }
