@@ -1,6 +1,8 @@
 @page "/"
 @using DnetIndexedDbServer.Infrastructure
 @using DnetIndexedDbServer.Infrastructure.Entities
+@using System.Text.Json
+@using DnetIndexedDbServer.Infrastructure.Models
 @inject IHttpClientFactory ClientFactory
 
 @inject IJSRuntime JSRuntime
@@ -8,6 +10,7 @@
 @inject GridColumnDataIndexedDb GridColumnDataIndexedDb
 @inject GridColumnDataIndexedDb2 GridColumnDataIndexedDb2
 @inject SecuritySuiteDataIndexedDb SecuritySuiteDataIndexedDb
+@inject DataRawDbDataIndexedDb DataRawDbDataIndexedDb
 
 <div class="dnet-desktop-content destok-layout" style="padding-top: 10px;">
     <div class="row" style="height: calc(100% - 0px)">
@@ -28,17 +31,44 @@
         if (firstRender)
         {
             //await InlineKeys();
-            await TestAttributes();
+            //await TestAttributes();
             //await InlineKeysPlusKeyGenerator();
             //await OutOfLinekeys();
             //await InlineKeysTwoDatabases();
             //await TestUpgrade();
+            await DataRaw();
         }
     }
 
     private async Task TestUpgrade()
     {
         var db1Result = await GridColumnDataIndexedDb.OpenIndexedDb();
+    }
+
+    //***Data Raw***
+    private async Task DataRaw()
+    {
+        var tableFieldService = new TableFieldService();
+
+        var itemsDb1 = tableFieldService.GetTableFields();
+
+        var jsonSrting = JsonSerializer.Serialize<List<TableFieldDto>>(itemsDb1);
+
+        var db1Result = await DataRawDbDataIndexedDb.OpenIndexedDb();
+
+        var indexedDbRawTable = new IndexedDbRawTable()
+            {
+                RowId = 1,
+                Data = jsonSrting
+            };
+
+        var db1Result2 = await DataRawDbDataIndexedDb.AddItems<IndexedDbRawTable>("dataraw", new List<IndexedDbRawTable>() { indexedDbRawTable });
+
+        var db1Result3 = await DataRawDbDataIndexedDb.GetByKey<int, IndexedDbRawTable>("dataraw", 1);
+
+        var items = JsonSerializer.Deserialize<List<TableFieldDto>>(db1Result3.Data);
+
+        var db1Result4 = await DataRawDbDataIndexedDb.DeleteIndexedDb();
     }
 
     //***in-line-keys (default)***

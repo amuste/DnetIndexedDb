@@ -14,9 +14,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>2.4.1</Version>
     <PackageReleaseNotes>
-      Bug: Obsolete object stores are not deleted during database upgrade
-      Bug: Could not add new object store to existing database.
-      Bug: Min / Max Empty Table
+      Feature: Added Fluent by Kylar
     </PackageReleaseNotes>
   </PropertyGroup>
 
