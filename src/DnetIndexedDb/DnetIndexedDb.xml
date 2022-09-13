@@ -28,6 +28,20 @@
             <param name="id"></param>
             <returns></returns>
         </member>
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbDatabaseExtensions.UseKeyGenerator(DnetIndexedDb.Models.IndexedDbDatabaseModel)">
+            <summary>
+            Sets Database UseKeyGenerator Property to true
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbDatabaseExtensions.UseKeyGenerator(DnetIndexedDb.Models.IndexedDbDatabaseModel,System.Boolean)">
+            <summary>
+            Sets Database UseKeyGenerator Property to given value
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
         <member name="M:DnetIndexedDb.Fluent.IndexedDbDatabaseExtensions.AddStore(DnetIndexedDb.Models.IndexedDbDatabaseModel,System.String)">
             <summary>
             Creates a new IndexedDbStore and adds it to the Database Model
@@ -36,7 +50,23 @@
             <param name="name"></param>
             <returns></returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:DnetIndexedDb.Fluent.IndexedDbDatabaseExtensions.AddStore``1(DnetIndexedDb.Models.IndexedDbDatabaseModel)" -->
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbDatabaseExtensions.AddStore``1(DnetIndexedDb.Models.IndexedDbDatabaseModel)">
+            <summary>
+            Adds a new store named TEntity.Name and adds Key and Indexes based on IndexedDbKey and IndexedDbIndex Attributes
+            </summary>
+            <typeparam name="TEntity"></typeparam>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbDatabaseExtensions.AddStore``1(DnetIndexedDb.Models.IndexedDbDatabaseModel,System.String)">
+            <summary>
+            Adds a new store and adds Key and Indexes based on IndexedDbKey and IndexedDbIndex Attributes
+            </summary>
+            <typeparam name="TEntity"></typeparam>
+            <param name="model"></param>
+            <param name="storeName"></param>
+            <returns></returns>
+        </member>
         <member name="M:DnetIndexedDb.Fluent.IndexedDbStoreExtensions.WithKey(DnetIndexedDb.Models.IndexedDbStore,System.String)">
             <summary>
             Add non-auto-incrementing key to store.
