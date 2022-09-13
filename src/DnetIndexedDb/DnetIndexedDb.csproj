@@ -18,8 +18,8 @@
     </PackageReleaseNotes>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>D:\Projects\DnetIndexedDb\src\DnetIndexedDb\DnetIndexedDb.xml</DocumentationFile>
+  <PropertyGroup>
+    <DocumentationFile>.\DnetIndexedDb.xml</DocumentationFile>
   </PropertyGroup>
 
 
