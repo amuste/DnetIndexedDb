@@ -18,7 +18,7 @@ Add Min/Max Extent Searching for Key and Index Fields</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>D:\Projects\DnetIndexedDb\src\DnetIndexedDb\DnetIndexedDb.xml</DocumentationFile>
+    <DocumentationFile>DnetIndexedDb\DnetIndexedDb.xml</DocumentationFile>
   </PropertyGroup>
 
 

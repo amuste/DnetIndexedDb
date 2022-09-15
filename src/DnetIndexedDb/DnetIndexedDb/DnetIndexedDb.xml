@@ -1,0 +1,356 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DnetIndexedDb</name>
+    </assembly>
+    <members>
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbDatabaseExtensions.WithName(DnetIndexedDb.Models.IndexedDbDatabaseModel,System.String)">
+            <summary>
+            Sets Name of Database Model
+            </summary>
+            <param name="model"></param>
+            <param name="name"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbDatabaseExtensions.WithVersion(DnetIndexedDb.Models.IndexedDbDatabaseModel,System.Int32)">
+            <summary>
+            Sets Version of Database Model
+            </summary>
+            <param name="model"></param>
+            <param name="version"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbDatabaseExtensions.WithModelId(DnetIndexedDb.Models.IndexedDbDatabaseModel,System.Int32)">
+            <summary>
+            Sets Database ModelId. Defaults to 0
+            </summary>
+            <param name="model"></param>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbDatabaseExtensions.UseKeyGenerator(DnetIndexedDb.Models.IndexedDbDatabaseModel)">
+            <summary>
+            Sets Database UseKeyGenerator Property to true
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbDatabaseExtensions.UseKeyGenerator(DnetIndexedDb.Models.IndexedDbDatabaseModel,System.Boolean)">
+            <summary>
+            Sets Database UseKeyGenerator Property to given value
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbDatabaseExtensions.AddStore(DnetIndexedDb.Models.IndexedDbDatabaseModel,System.String)">
+            <summary>
+            Creates a new IndexedDbStore and adds it to the Database Model
+            </summary>
+            <param name="model"></param>
+            <param name="name"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbDatabaseExtensions.AddStore``1(DnetIndexedDb.Models.IndexedDbDatabaseModel)">
+            <summary>
+            Adds a new store named TEntity.Name and adds Key and Indexes based on IndexedDbKey and IndexedDbIndex Attributes
+            </summary>
+            <typeparam name="TEntity"></typeparam>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbDatabaseExtensions.AddStore``1(DnetIndexedDb.Models.IndexedDbDatabaseModel,System.String)">
+            <summary>
+            Adds a new store and adds Key and Indexes based on IndexedDbKey and IndexedDbIndex Attributes
+            </summary>
+            <typeparam name="TEntity"></typeparam>
+            <param name="model"></param>
+            <param name="storeName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbStoreExtensions.WithKey(DnetIndexedDb.Models.IndexedDbStore,System.String)">
+            <summary>
+            Add non-auto-incrementing key to store.
+            </summary>
+            <param name="store">IndexedDb Store</param>
+            <param name="name"></param>
+            <returns>Given IndexedDbStore Instance</returns>
+        </member>
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbStoreExtensions.WithAutoIncrementingKey(DnetIndexedDb.Models.IndexedDbStore,System.String)">
+            <summary>
+            Add auto-incrementing key to store.
+            </summary>
+            <param name="store">IndexedDb Store</param>
+            <param name="name"></param>
+            <returns>Given IndexedDbStore Instance</returns>
+        </member>
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbStoreExtensions.AddUniqueIndex(DnetIndexedDb.Models.IndexedDbStore,System.String)">
+            <summary>
+            Add unique index to store.
+            </summary>
+            <param name="store">IndexedDb Store</param>
+            <param name="name"></param>
+            <returns>Given IndexedDbStore Instance</returns>
+        </member>
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbStoreExtensions.AddIndex(DnetIndexedDb.Models.IndexedDbStore,System.String)">
+            <summary>
+            Add non-unique index to store.
+            </summary>
+            <param name="store">IndexedDb Store</param>
+            <param name="name"></param>
+            <returns>Given IndexedDbStore Instance</returns>
+        </member>
+        <member name="M:DnetIndexedDb.Fluent.IndexedDbStoreExtensions.SetupFrom``1(DnetIndexedDb.Models.IndexedDbStore)">
+            <summary>
+            Adds Key and Indexes to Store based on IndexedDbKey and IndexedDbIndex Attributes on properties in Type T
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="store"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.OpenIndexedDb">
+            <summary>
+            Create, Open or Upgrade IndexedDb Database
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.DeleteIndexedDb">
+            <summary>
+            Delete IndexedDb Database
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.AddItems``1(System.String,System.Collections.Generic.List{``0})">
+            <summary>
+            Add records to a given data store
+            </summary>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <param name="objectStoreName"></param>
+            <param name="items"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.AddItems``1(System.Collections.Generic.List{``0})">
+            <summary>
+            Add records to a data store matching TEntity.Name
+            </summary>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <param name="items"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.UpdateItems``1(System.String,System.Collections.Generic.List{``0})">
+            <summary>
+            Update records in a given data store
+            </summary>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <param name="objectStoreName"></param>
+            <param name="items"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.UpdateItems``1(System.Collections.Generic.List{``0})">
+            <summary>
+            Update records in a data store matching TEntity.Name
+            </summary>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <param name="items"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.UpdateItemsByKey``1(System.String,System.Collections.Generic.List{``0},System.Collections.Generic.List{System.Int32})">
+            <summary>
+            Update records in a given data store by key
+            </summary>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <param name="objectStoreName"></param>
+            <param name="items"></param>
+            <param name="keys"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.UpdateItemsByKey``1(System.Collections.Generic.List{``0},System.Collections.Generic.List{System.Int32})">
+            <summary>
+            Update records in a data store matching TEntity.Name by key
+            </summary>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <param name="items"></param>
+            <param name="keys"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetByKey``2(System.String,``0)">
+            <summary>
+            Return a record in a given data store by its key
+            </summary>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <typeparam name="TKey">Type of Key Field</typeparam>
+            <param name="key"></param>
+            <param name="objectStoreName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetByKey``2(``0)">
+            <summary>
+            Return a record in a data store matching TEntity.Name by key
+            </summary>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <typeparam name="TKey">Type of Key Field</typeparam>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.DeleteByKey``1(System.String,``0)">
+            <summary>
+            Delete a record in a given data store by its key
+            </summary>
+            <typeparam name="TKey">Type of Key Field</typeparam>
+            <param name="key"></param>
+            <param name="objectStoreName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.DeleteByKey``2(``0)">
+            <summary>
+            Delete a record in a data store matching TEntity.Name by key
+            </summary>
+            <typeparam name="TKey">Type of Key Field</typeparam>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.DeleteAll(System.String)">
+            <summary>
+            Delete all records in a given data store
+            </summary>
+            <param name="objectStoreName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.DeleteAll``1">
+            <summary>
+            Delete all records in a data store matching TEntity.Name
+            </summary>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetAll``1(System.String)">
+            <summary>
+            Return all records in a given data store
+            </summary>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <param name="objectStoreName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetAll``1">
+            <summary>
+            Return all records in a data store matching TEntity.Name
+            </summary>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetRange``2(System.String,``0,``0)">
+            <summary>
+            Return some records in a given data store by key
+            </summary>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <typeparam name="TKey">Type of Key Field</typeparam>
+            <param name="objectStoreName"></param>
+            <param name="lowerBound"></param>
+            <param name="upperBound"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetRange``2(``0,``0)">
+            <summary>
+            Return some records in a data store matching TEntity.Name by key
+            </summary>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <typeparam name="TKey">Type of Key Field</typeparam>
+            <param name="lowerBound"></param>
+            <param name="upperBound"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetByIndex``2(System.String,``0,``0,System.String,System.Boolean)">
+            <summary>
+            Return some records in a given data store by index
+            </summary>
+            <typeparam name="TKey">Type of Key Field</typeparam>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <param name="objectStoreName"></param>
+            <param name="lowerBound"></param>
+            <param name="upperBound"></param>
+            <param name="dbIndex"></param>
+            <param name="isRange"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetByIndex``2(``0,``0,System.String,System.Boolean)">
+            <summary>
+            Return some records in a data store matching TEntity.Name by index
+            </summary>
+            <typeparam name="TKey">Type of Key Field</typeparam>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <param name="lowerBound"></param>
+            <param name="upperBound"></param>
+            <param name="dbIndex"></param>
+            <param name="isRange"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetMaxIndex``1(System.String,System.String)">
+            <summary>
+            Returns the max value in the given data store's index
+            </summary>
+            <typeparam name="TIndex"></typeparam>
+            <param name="objectStoreName"></param>
+            <param name="dbIndex"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetMaxIndex``2(System.String)">
+            <summary>
+            Returns the max value in a data store matching TEntity.Name by index
+            </summary>
+            <typeparam name="TIndex"></typeparam>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <param name="dbIndex"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetMaxKey``1(System.String)">
+            <summary>
+            Returns the max value in the given data store's key
+            </summary>
+            <typeparam name="TKey">Type of Key Field</typeparam>
+            <param name="objectStoreName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetMaxKey``2">
+            <summary>
+            Returns the max value in a data store matching TEntity.Name 
+            </summary>
+            <typeparam name="TKey">Type of Key Field</typeparam>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetMinIndex``1(System.String,System.String)">
+            <summary>
+            Returns the minimum value in the given data store's index by key 
+            </summary>
+            <typeparam name="TIndex"></typeparam>
+            <param name="objectStoreName"></param>
+            <param name="dbIndex"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetMinIndex``2(System.String)">
+            <summary>
+            Returns the minimum value in a data store matching TEntity.Name by index
+            </summary>
+            <typeparam name="TIndex"></typeparam>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <param name="dbIndex"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetMinKey``1(System.String)">
+            <summary>
+            Returns the minimum value in the given data store's key 
+            </summary>
+            <typeparam name="TKey">Type of Key Field</typeparam>
+            <param name="objectStoreName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetMinKey``2">
+            <summary>
+            Returns the minimum value in a data store matching TEntity.Name by key 
+            </summary>
+            <typeparam name="TKey">Type of Key Field</typeparam>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
