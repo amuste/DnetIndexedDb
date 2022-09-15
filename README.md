@@ -546,13 +546,22 @@ OR
   var result = await BlobDb.GetBlobByKey("StoreName", "myrecordkey1");
 ```
 
-### Get unmarshalled blob from the store int .net buffer (fast)
+### Get unmarshalled blob from the store into .net buffer (fast, .NET 5 ONLY)
 
-```ValueTask<string> GetBlobByKey(string objectStoreName, key, byte[] destination, int maxBytes)```
+```ValueTask<string> GetBlobByKeyNet5(string objectStoreName, key, byte[] destination, int maxBytes)```
 
 ```CSharp
-  var result = await BlobDb.GetBlobByKey("StoreName", "myrecordkey1", mybuffer, mybuffermaxsize);
+  var result = await BlobDb.GetBlobByKeyNet5("StoreName", "myrecordkey1", mybuffer, mybuffermaxsize);
 ```
+
+### Get blob from the store (fast, .NET 6+ ONLY)
+
+```ValueTask<byte[]> GetBlobByKey(string objectStoreName, key, int maxBytes)```
+
+```CSharp
+  var result = await BlobDb.GetBlobByKey("StoreName", "myrecordkey1", mybuffermaxsize);
+```
+
 
 ### Assign blob directly to HTML element without marshalling into .NET (fast)
 

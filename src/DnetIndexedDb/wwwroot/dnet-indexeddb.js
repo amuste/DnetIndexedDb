@@ -1141,7 +1141,7 @@ window.dnetindexeddbinterop = (function () {
 
 
     function getDbModel(dbModelGuid) {
-
+        console.log(`Getting db model ${dbModelGuid}`);
         const dbModel = dbModels.find(element => element.dbModel.dbModelGuid === dbModelGuid);
 
         return dbModel;
@@ -1277,7 +1277,7 @@ window.dnetindexeddbinterop = (function () {
             var bytesReturned = Blazor.platform.readInt32Field(fields, 32);
             var bytesReturnedArray = Blazor.platform.toUint8Array(bytesReturned);
 
-            return (async () => {
+            return (async () =>  {
                 const dbModelGuid = Blazor.platform.readStringField(fields, 0);
                 const objectStoreName = Blazor.platform.readStringField(fields, 8);
                 const key = Blazor.platform.readStringField(fields, 16);
@@ -1325,6 +1325,60 @@ window.dnetindexeddbinterop = (function () {
                 bytesReturnedArray.set(arr, 0);// set bytes returned to -1 on error
             });
         },
+
+
+        //// Faster version of above by writing into .net memory buffer. 
+        ////
+        //// See:
+        //// https://github.com/SteveSandersonMS/BlazorInputFile/blob/master/BlazorInputFile/SharedMemoryFileListEntryStream.cs
+        //// https://github.com/SteveSandersonMS/BlazorInputFile/blob/master/BlazorInputFile/wwwroot/inputfile.js
+        //// https://github.com/SteveSandersonMS/BlazorInputFile/blob/master/BlazorInputFile/FileListEntryStream.cs
+        ////
+        //// Unmarshalled invoke doesn't seem to have an async version, so return value synchronously
+        ////
+        getBlobByKey3: function (indexedDbDatabaseModel, objectStoreName, key, maxBytes) {
+            return (async () => {
+                const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+                const res = await getByKey(dbModel, objectStoreName, key).pipe(Rx.operators.take(1)).toPromise();
+                //console.log(`got blob: ${res}`);
+                if (res == undefined) {
+                    throw "Blob with key " + key + " not found";
+                }
+                else {
+                    const reader = new FileReader();
+                    reader.readAsArrayBuffer(res);
+                    console.log("getBlobByKey3() returning promise");
+
+                    //let result = await
+                    return new Promise(resolve => {
+                        reader.onloadend = () => {
+                            console.log("getBlobByKey3() load ended");
+                            var sourceArrayBuffer = reader.result;
+                            var bytesToRead = Math.min(maxBytes, sourceArrayBuffer.byteLength);
+                            console.log(`getBlobByKey3() bytes to read ${bytesToRead}`);
+                            var sourceUint8Array = new Uint8Array(sourceArrayBuffer, 0, bytesToRead);
+                            console.log(`Source array first three bytes=${sourceUint8Array[0]} ${sourceUint8Array[1]} ${sourceUint8Array[2]} `)
+                            resolve(sourceUint8Array);
+                            //var destinationUint8Array = Blazor.platform.toUint8Array(destination);
+                            //destinationUint8Array.set(sourceUint8Array, 0);
+                            //console.log(`Dest array first three bytes=${destinationUint8Array[0]} ${destinationUint8Array[1]} ${destinationUint8Array[2]} `)
+                            //console.log(`getBlobByKey3() promise returning ${bytesToRead}`);
+                            //var bytesReturnedArray = Blazor.platform.toUint8Array(bytesReturned);
+                            //var readout = new Uint8Array(toBytesInt32(bytesToRead));
+                            //console.log(`getBlobByKey3() readout[0] ${readout[0]}`);
+                            //bytesReturnedArray.set(readout, 0);
+                            //resolve(bytesToRead);
+
+                        };
+                    });
+                }
+            })().catch(e => {
+                console.error(e);
+                return new Uint8Array(0);
+            });
+        },
+
+
         // Faster version of above by writing into .net memory buffer. 
         //
         // See:
@@ -1382,7 +1436,21 @@ window.dnetindexeddbinterop = (function () {
             const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await getExtent(dbModel, objectStoreName, dbIndex, extentTypes[extentType]).pipe(Rx.operators.take(1)).toPromise();
+        },
+
+        unmarshalledFunctionReturnBoolean: function (fields) {
+            const name = Blazor.platform.readStringField(fields, 0);
+            const year = Blazor.platform.readInt32Field(fields, 8);
+
+            return name === "Brigadier Alistair Gordon Lethbridge-Stewart" &&
+                year === 1968;
+        },
+        unmarshalledFunctionReturnString: function (fields) {
+            const name = Blazor.platform.readStringField(fields, 0);
+            const year = Blazor.platform.readInt32Field(fields, 8);
+            return BINDING.js_string_to_mono_string(`Hello, ${name} (${year})!`);
         }
+
 
     };
 })();
