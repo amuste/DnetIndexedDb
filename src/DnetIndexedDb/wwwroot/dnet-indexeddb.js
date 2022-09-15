@@ -1293,24 +1293,24 @@ window.dnetindexeddbinterop = (function () {
                 else {
                     const reader = new FileReader();
                     reader.readAsArrayBuffer(res);
-                    //console.log("getBlobByKey2() returning promise");
+                    console.log("getBlobByKey2() returning promise");
 
                     //let result = await
                     return new Promise(resolve => {
                         reader.onloadend = () => {
-                            //console.log("getBlobByKey2() load ended");
+                            console.log("getBlobByKey2() load ended");
                             var sourceArrayBuffer = reader.result;
                             var bytesToRead = Math.min(maxBytes, sourceArrayBuffer.byteLength);
-                            //console.log(`getBlobByKey2() bytes to read ${bytesToRead}`);
+                            console.log(`getBlobByKey2() bytes to read ${bytesToRead}`);
                             var sourceUint8Array = new Uint8Array(sourceArrayBuffer, 0, bytesToRead);
-                            //console.log(`Source array first three bytes=${sourceUint8Array[0]} ${sourceUint8Array[1]} ${sourceUint8Array[2]} `)
+                            console.log(`Source array first three bytes=${sourceUint8Array[0]} ${sourceUint8Array[1]} ${sourceUint8Array[2]} `)
                             var destinationUint8Array = Blazor.platform.toUint8Array(destination);
                             destinationUint8Array.set(sourceUint8Array, 0);
-                            //console.log(`Dest array first three bytes=${destinationUint8Array[0]} ${destinationUint8Array[1]} ${destinationUint8Array[2]} `)
-                            //console.log(`getBlobByKey2() promise returning ${bytesToRead}`);
+                            console.log(`Dest array first three bytes=${destinationUint8Array[0]} ${destinationUint8Array[1]} ${destinationUint8Array[2]} `)
+                            console.log(`getBlobByKey2() promise returning ${bytesToRead}`);
                             var bytesReturnedArray = Blazor.platform.toUint8Array(bytesReturned);                            
                             var readout = new Uint8Array(toBytesInt32(bytesToRead));
-                            //console.log(`getBlobByKey2() readout[0] ${readout[0]}`);
+                            console.log(`getBlobByKey2() readout[0] ${readout[0]}`);
                             bytesReturnedArray.set(readout, 0);
                             resolve(bytesToRead);
 

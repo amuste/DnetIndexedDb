@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Authors>Adrian Mustelier Camino</Authors>
     <Company>Datalnet Adrian Mustelier Camino</Company>
     <Description>IndexedDB wrapper for Blazor</Description>
@@ -18,7 +18,7 @@ Add Min/Max Extent Searching for Key and Index Fields</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>DnetIndexedDb\DnetIndexedDb.xml</DocumentationFile>
+    <!--<DocumentationFile>DnetIndexedDb\DnetIndexedDb.xml</DocumentationFile>-->
   </PropertyGroup>
 
 

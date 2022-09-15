@@ -249,10 +249,11 @@ namespace DnetIndexedDb
 
             var res= unmarshalledRuntime.InvokeUnmarshalled<GetBlobStruct, int>("dnetindexeddbinterop.getBlobByKey2", getblob);
             // invoke umarshalled seems to return immediately, wait for result to get written
-            while (bytesReturned[0] == 0 && bytesReturned[1] == 0 && bytesReturned[2] == 0 && bytesReturned[3] == 0)
-            {
-                await Task.Delay(10);
-            }
+            await Task.Delay(10000);
+            //while (bytesReturned[0] == 0 && bytesReturned[1] == 0 && bytesReturned[2] == 0 && bytesReturned[3] == 0)
+            //{
+            //    await Task.Delay(10);
+            //}
             if (BitConverter.IsLittleEndian) Array.Reverse(getblob.BytesReturned);
             var br = BitConverter.ToInt32(getblob.BytesReturned, 0);
             return br;
