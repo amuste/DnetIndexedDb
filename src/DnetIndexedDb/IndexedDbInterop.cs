@@ -224,56 +224,21 @@ namespace DnetIndexedDb
             return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.getBlobByKey", _indexedDbDatabaseModel, objectStoreName, key);
         }
 
-        private InteropStruct GetStruct()
-        {
-            return new InteropStruct
-            {
-                Name = "Brigadier Alistair Gordon Lethbridge-Stewart",
-                Year = 1968,
-            };
-        }
-
-        public string TestNet6Interop()
-        {
-            string res = "";
-            var unmarshalledRuntime = (IJSUnmarshalledRuntime)_jsRuntime;
-
-            //var jsUnmarshalledReference = unmarshalledRuntime
-            //    .InvokeUnmarshalled<IJSUnmarshalledObjectReference>(
-            //        "returnObjectReference");
-
-            //res =
-            //    jsUnmarshalledReference.InvokeUnmarshalled<InteropStruct, string>(
-            //        "unmarshalledFunctionReturnString", GetStruct());
-
-
-            //var jsUnmarshalledReference = unmarshalledRuntime
-            //    .InvokeUnmarshalled<IJSUnmarshalledObjectReference>(
-            //        "dnetindexeddbinterop");
-
-            res =
-                unmarshalledRuntime.InvokeUnmarshalled<InteropStruct, string>(
-                    "dnetindexeddbinterop.unmarshalledFunctionReturnString", GetStruct());
-
-            return res;
-        }
-
-        ///// <summary>
-        ///// Return a record in a given data store by its key
-        ///// </summary>
-        ///// <param name="key"></param>
-        ///// <param name="objectStoreName"></param>
-        ///// <param name="destination"></param>
-        ///// <param name="maxBytes"></param>
-        ///// <returns></returns>
-        //public async ValueTask<int> GetBlobByKeyNet6(string objectStoreName, string key, byte[] destination, int maxBytes)
+        /// <summary>
+        /// Return a record in a given data store by its key
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="objectStoreName"></param>
+        /// <param name="destination"></param>
+        /// <param name="maxBytes"></param>
+        /// <returns></returns>
+        //[Obsolete("This function is only compatible with .NET 5")]
+        //public async ValueTask<int> GetBlobByKeyNet5(string objectStoreName, string key, byte[] destination, int maxBytes)
         //{
         //    //return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.getBlobByKey2", _indexedDbDatabaseModel, objectStoreName, key);
+
         //    var unmarshalledRuntime = (IJSUnmarshalledRuntime)_jsRuntime;
 
-        //    var jsUnmarshalledReference = unmarshalledRuntime
-        //        .InvokeUnmarshalled<IJSUnmarshalledObjectReference>(
-        //            "returnObjectReference");
         //    var bytesReturned = new byte[4];
         //    var getblob = new GetBlobStruct
         //    {
@@ -285,62 +250,24 @@ namespace DnetIndexedDb
         //        BytesReturned = bytesReturned
         //    };
 
-        //    var res = jsUnmarshalledReference.InvokeUnmarshalled<GetBlobStruct, int>("getBlobByKey3", getblob);
+
+        //    var res= unmarshalledRuntime.InvokeUnmarshalled<GetBlobStruct, int>("dnetindexeddbinterop.getBlobByKey2", getblob);
+
         //    // invoke umarshalled seems to return immediately, wait for result to get written
-        //    //await Task.Delay(10000);
+        //    await Task.Delay(3000);
         //    while (bytesReturned[0] == 0 && bytesReturned[1] == 0 && bytesReturned[2] == 0 && bytesReturned[3] == 0)
         //    {
         //        await Task.Delay(10);
         //    }
+        //    var b1 = getblob.Destination[0];
+        //    var b2 = getblob.Destination[1];
+        //    var b3 = getblob.Destination[2];
+        //    var b4 = getblob.Destination[3];
+            
         //    if (BitConverter.IsLittleEndian) Array.Reverse(getblob.BytesReturned);
         //    var br = BitConverter.ToInt32(getblob.BytesReturned, 0);
         //    return br;
         //}
-
-        /// <summary>
-        /// Return a record in a given data store by its key
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="objectStoreName"></param>
-        /// <param name="destination"></param>
-        /// <param name="maxBytes"></param>
-        /// <returns></returns>
-        [Obsolete("This function is only compatible with .NET 5")]
-        public async ValueTask<int> GetBlobByKeyNet5(string objectStoreName, string key, byte[] destination, int maxBytes)
-        {
-            //return await _jsRuntime.InvokeAsync<string>("dnetindexeddbinterop.getBlobByKey2", _indexedDbDatabaseModel, objectStoreName, key);
-
-            var unmarshalledRuntime = (IJSUnmarshalledRuntime)_jsRuntime;
-
-            var bytesReturned = new byte[4];
-            var getblob = new GetBlobStruct
-            {
-                DbModelGuid = _indexedDbDatabaseModel.DbModelGuid,
-                Destination = destination,
-                MaxBytes = maxBytes,
-                Key = key,
-                ObjectStoreName = objectStoreName,
-                BytesReturned = bytesReturned
-            };
-
-
-            var res= unmarshalledRuntime.InvokeUnmarshalled<GetBlobStruct, int>("dnetindexeddbinterop.getBlobByKey2", getblob);
-
-            // invoke umarshalled seems to return immediately, wait for result to get written
-            await Task.Delay(3000);
-            while (bytesReturned[0] == 0 && bytesReturned[1] == 0 && bytesReturned[2] == 0 && bytesReturned[3] == 0)
-            {
-                await Task.Delay(10);
-            }
-            var b1 = getblob.Destination[0];
-            var b2 = getblob.Destination[1];
-            var b3 = getblob.Destination[2];
-            var b4 = getblob.Destination[3];
-            
-            if (BitConverter.IsLittleEndian) Array.Reverse(getblob.BytesReturned);
-            var br = BitConverter.ToInt32(getblob.BytesReturned, 0);
-            return br;
-        }
 
 
         /// <summary>
@@ -353,7 +280,7 @@ namespace DnetIndexedDb
         /// <param name="key"></param>
         /// <param name="objectStoreName"></param>
         /// <returns></returns>
-        public async ValueTask<byte[]> GetBlobByKeyNet(string objectStoreName, string key, int maxBytes)
+        public async ValueTask<byte[]> GetBlobByKey(string objectStoreName, string key, int maxBytes)
         {
             var res = await _jsRuntime.InvokeAsync<byte[]>("dnetindexeddbinterop.getBlobByKey3", _indexedDbDatabaseModel, objectStoreName, key, maxBytes);
             return res;
