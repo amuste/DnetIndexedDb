@@ -119,6 +119,17 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.AddBlobItem``1(System.String,``0,System.String,System.String)">
+            <summary>
+            Add records to a given data store
+            </summary>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <param name="objectStoreName"></param>
+            <param name="item"></param>
+            <param name="key"></param>
+            <param name="mimeType"></param>
+            <returns></returns>
+        </member>
         <member name="M:DnetIndexedDb.IndexedDbInterop.AddItems``1(System.String,System.Collections.Generic.List{``0})">
             <summary>
             Add records to a given data store
@@ -180,6 +191,57 @@
             <typeparam name="TKey">Type of Key Field</typeparam>
             <param name="key"></param>
             <param name="objectStoreName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.UpdateBlobByKey``1(System.String,``0,System.String,System.String)">
+            <summary>
+            Add records to a given data store
+            </summary>
+            <typeparam name="TEntity">Type of Objects in Data Store</typeparam>
+            <param name="objectStoreName"></param>
+            <param name="item"></param>
+            <param name="key"></param>
+            <param name="mimeType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetBlobByKey(System.String,System.String)">
+            <summary>
+            Return a record in a given data store by its key
+            </summary>
+            <param name="key"></param>
+            <param name="objectStoreName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.GetBlobByKey(System.String,System.String,System.Byte[],System.Int32)">
+            <summary>
+            Return a record in a given data store by its key
+            </summary>
+            <param name="key"></param>
+            <param name="objectStoreName"></param>
+            <param name="destination"></param>
+            <param name="maxBytes"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.AssignBlobToElement(System.String,System.String,System.String,System.String)">
+            <summary>
+            Directly references blob from html element without having to marshall it into .NET
+            </summary>
+            <typeparam name="TKey"></typeparam>
+            <param name="objectStoreName"></param>
+            <param name="key"></param>
+            <param name="elementId"></param>
+            <param name="attribute"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DnetIndexedDb.IndexedDbInterop.UpdateBlobFromElement(System.String,System.String,System.String,System.String)">
+            <summary>
+            Directly updates blob from html element without having to marshall it into .NET
+            </summary>
+            <typeparam name="TKey"></typeparam>
+            <param name="objectStoreName"></param>
+            <param name="key"></param>
+            <param name="elementId"></param>
+            <param name="attribute"></param>
             <returns></returns>
         </member>
         <member name="M:DnetIndexedDb.IndexedDbInterop.GetByKey``2(``0)">
