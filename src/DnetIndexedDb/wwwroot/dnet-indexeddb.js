@@ -14,6 +14,7 @@ window.dnetindexeddbinterop = (function () {
         DB_OPEN_ERROR: 'DB_OPEN_ERROR',
         DB_DELETED: 'DB_DELETED',
         DB_DELETED_ERROR: 'DB_DELETED_ERROR',
+        DB_DELETED_BLOCKED: 'DB_DELETED_BLOCKED',
         DB_DATA_ADDED: 'DB_DATA_ADDED',
         DB_DATA_ADD_ERROR: 'DB_DATA_ADD_ERROR',
         DB_DATA_UPDATED: 'DB_DATA_UPDATED',
@@ -34,7 +35,8 @@ window.dnetindexeddbinterop = (function () {
         'success': 'success',
         'error': 'error',
         'complete': 'complete',
-        'upgradeneeded': 'upgradeneeded'
+        'upgradeneeded': 'upgradeneeded', 
+        'blocked': 'blocked'
     };
 
     const extentTypes = {
@@ -84,6 +86,10 @@ window.dnetindexeddbinterop = (function () {
                 const onSuccess = (event) => {
 
                     dbModel.instance = event.target.result;
+
+                    dbModel.instance.onversionchange = () => {
+                        dbModel.instance.close();
+                    };
 
                     dbModels.push({ 'dbModel': dbModel });
 
@@ -221,9 +227,9 @@ window.dnetindexeddbinterop = (function () {
                 dbModel.instance.close();
             }
 
-            var deleteRequest = indexedDB.deleteDatabase(dbModel.name);
+            const deleteRequest = indexedDB.deleteDatabase(dbModel.name);
 
-            var onSuccess = (event) => {
+            const onSuccess = (event) => {
 
                 const index = dbModels.findIndex(item => item.dbModelGuid === dbModel.dbModelGuid);
 
@@ -236,16 +242,22 @@ window.dnetindexeddbinterop = (function () {
                 observer.complete();
             };
 
-            var onError = (err) => {
+            const onError = (err) => {
                 observer.error(indexedDbMessages.DB_DELETED_ERROR);
+            };
+
+            const onBlocked = (err) => {
+                observer.error(indexedDbMessages.DB_DELETED_BLOCKED);
             };
 
             deleteRequest.addEventListener(eventTypes.success, onSuccess);
             deleteRequest.addEventListener(eventTypes.error, onError);
+            deleteRequest.addEventListener(eventTypes.blocked, onBlocked);
 
             return () => {
                 deleteRequest.removeEventListener(eventTypes.success, onSuccess);
                 deleteRequest.removeEventListener(eventTypes.error, onError);
+                deleteRequest.removeEventListener(eventTypes.blocked, onBlocked);
             };
 
         });

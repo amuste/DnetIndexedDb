@@ -47,6 +47,11 @@ namespace DnetIndexedDbServer
             {
                 options.UseDatabase(model1);
             });
+
+            services.AddIndexedDbDatabase<DataRawDbDataIndexedDb>(options =>
+            {
+                options.UseDatabase(GetDataRawDatabaseModel());
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -300,6 +305,49 @@ namespace DnetIndexedDbServer
                     }
                 }
             },
+                DbModelId = 0
+            };
+
+            return indexedDbDatabaseModel;
+        }
+
+        public static IndexedDbDatabaseModel GetDataRawDatabaseModel()
+        {
+            var indexedDbDatabaseModel = new IndexedDbDatabaseModel
+            {
+                Name = "DataRawDb",
+                Version = 1,
+                Stores = new List<IndexedDbStore>
+                {
+                        new IndexedDbStore
+                        {
+                            Name = "dataraw",
+                            Key = new IndexedDbStoreParameter
+                            {
+                                KeyPath = "rowId",
+                                AutoIncrement = true
+                            },
+                            Indexes = new List<IndexedDbIndex>
+                            {
+                                new IndexedDbIndex
+                                {
+                                    Name = "rowId",
+                                    Definition = new IndexedDbIndexParameter
+                                    {
+                                        Unique = true
+                                    }
+                                },
+                                new IndexedDbIndex
+                                {
+                                    Name = "data",
+                                    Definition = new IndexedDbIndexParameter
+                                    {
+                                        Unique = false
+                                    }
+                                },
+                            }
+                        },
+                },
                 DbModelId = 0
             };
 

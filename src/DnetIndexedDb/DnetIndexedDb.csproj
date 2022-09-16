@@ -12,9 +12,10 @@
     <PackageTags>Blazor IndexedDB Datalnet</PackageTags>
     <Copyright>Copyright 2020 (c) Datalnet. All rights reserved.</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.3.2</Version>
-    <PackageReleaseNotes>Fluent Extensions for Database Creation
-Add Min/Max Extent Searching for Key and Index Fields</PackageReleaseNotes>
+    <Version>2.4.1</Version>
+    <PackageReleaseNotes>
+      Feature: Added Fluent by Kylar
+    </PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
