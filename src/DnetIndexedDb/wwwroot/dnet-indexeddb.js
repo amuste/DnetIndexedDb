@@ -62,6 +62,12 @@ window.dnetindexeddbinterop = (function () {
         return result;
     }
 
+    class BlobKeyNotFoundException extends Error {
+        constructor(key) {
+            super(`Blob Key not found: ${key}`);
+        }
+    }
+
     function open(dbModel) {
 
         var isUpgradeneeded = false;
@@ -124,6 +130,8 @@ window.dnetindexeddbinterop = (function () {
             }
         });
     }
+
+   
 
     function upgradeDb(currentDbVersion, stores, oldStores, transaction) {
 
@@ -192,6 +200,13 @@ window.dnetindexeddbinterop = (function () {
         }
     }
 
+    function toBytesInt32(num) {
+        arr = new ArrayBuffer(4); // an Int32 takes 4 bytes
+        view = new DataView(arr);
+        view.setUint32(0, num, false); // byteOffset = 0; litteEndian = false
+        return arr;
+    }
+
     function createStore(currentDbVersion, store) {
 
         const key = store.key.keyPath === "" ? { autoIncrement: true } : store.key;
@@ -247,6 +262,155 @@ window.dnetindexeddbinterop = (function () {
 
         });
     }
+
+    function addBlobItem(dbModel, objectStoreName, data, key = null) {
+
+        return Rx.Observable.create((observer) => {
+
+            if (dbModel.instance === null) {
+
+                observer.error(indexedDbMessages.DB_CLOSE);
+
+            } else {
+
+                const transaction = dbModel.instance.transaction([objectStoreName], transactionTypes.readwrite);
+
+                const onTransactionError = (error) => {
+                    observer.error(indexedDbMessages.DB_TRANSACTION_ERROR);
+                };
+
+                const onComplete = (event) => {
+                    observer.next(indexedDbMessages.DB_DATA_ADDED);
+                    observer.complete();
+                };
+
+                const objectStore = transaction.objectStore(objectStoreName);
+
+                const addItem = (item,key) => {
+
+                    return new Rx.Observable((addReqObserver) => {
+
+                        const store = dbModel.stores.find(p => p.name === objectStoreName);
+
+                        const keyPath = store.key.keyPath;
+
+                        if (keyPath !== "" && dbModel.useKeyGenerator) delete item[keyPath];
+
+                        const addRequest = objectStore.add(item,key);
+
+                        const onRequestError = (error) => {
+                            addReqObserver.error(indexedDbMessages.DB_DATA_ADD_ERROR);
+                        };
+
+                        const onSuccess = (event) => {
+                            addReqObserver.next(event);
+                            addReqObserver.complete();
+                        };
+
+                        addRequest.addEventListener(eventTypes.success, onSuccess);
+                        addRequest.addEventListener(eventTypes.error, onRequestError);
+
+                        return () => {
+                            addRequest.removeEventListener(eventTypes.success, onSuccess);
+                            addRequest.removeEventListener(eventTypes.error, onRequestError);
+                        };
+
+                    });
+                };
+
+                transaction.addEventListener(eventTypes.error, onTransactionError);
+                transaction.addEventListener(eventTypes.complete, onComplete);
+
+                const addRequestSubscriber = addItem(data,key)
+                .subscribe(() => { }, (error) => { observer.error(error); });
+
+                return () => {
+                    transaction.removeEventListener(eventTypes.complete, onComplete);
+                    transaction.removeEventListener(eventTypes.error, onTransactionError);
+                    addRequestSubscriber.unsubscribe();
+                };
+
+            }
+        });
+    }
+
+
+    function updateBlobItem(dbModel, objectStoreName, data, key = null) {
+        //console.log("Updating blob item");
+        return Rx.Observable.create((observer) => {
+
+            if (dbModel.instance === null) {
+
+                observer.error(indexedDbMessages.DB_CLOSE);
+
+            } else {
+
+                const transaction = dbModel.instance.transaction([objectStoreName], transactionTypes.readwrite);
+
+                const onTransactionError = (error) => {
+                    observer.error(indexedDbMessages.DB_TRANSACTION_ERROR);
+                };
+
+                const onComplete = (event) => {
+                    observer.next(indexedDbMessages.DB_DATA_UPDATED);
+                    observer.complete();
+                };
+
+                const objectStore = transaction.objectStore(objectStoreName);
+
+                const update = (item, key) => {
+
+                    //console.log("In update");
+                    return new Rx.Observable((updateReqObserver) => {
+
+                        const store = dbModel.stores.find(p => p.name === objectStoreName);
+
+                        const keyPath = store.key.keyPath;
+
+                        if (keyPath !== "" && dbModel.useKeyGenerator) delete item[keyPath];
+
+                        //console.log("calling update");
+                        const updateRequest = objectStore.put(item, key);
+
+                        const onRequestError = (error) => {
+                            //console.log("update error");
+                            updateReqObserver.error(indexedDbMessages.DB_DATA_UPDATE_ERROR);
+                        };
+
+                        const onSuccess = (event) => {
+                            //console.log("update ");
+                            updateReqObserver.next(event);
+                            updateReqObserver.complete();
+                        };
+
+                        updateRequest.addEventListener(eventTypes.success, onSuccess);
+                        updateRequest.addEventListener(eventTypes.error, onRequestError);
+
+                        return () => {
+                            updateRequest.removeEventListener(eventTypes.success, onSuccess);
+                            updateRequest.removeEventListener(eventTypes.error, onRequestError);
+                        };
+
+                    });
+                };
+
+                transaction.addEventListener(eventTypes.error, onTransactionError);
+                transaction.addEventListener(eventTypes.complete, onComplete);
+                //console.log("Calling update");
+                const updateRequestSubscriber = update(data, key)
+                    .subscribe(() => { }, (error) => { observer.error(error); });
+
+                return () => {
+                    transaction.removeEventListener(eventTypes.complete, onComplete);
+                    transaction.removeEventListener(eventTypes.error, onTransactionError);
+                    updateRequestSubscriber.unsubscribe();
+                };
+
+            }
+        });
+    }
+
+
 
     function addItems(dbModel, objectStoreName, data, concurrentTranscations = 20) {
 
@@ -511,6 +675,8 @@ window.dnetindexeddbinterop = (function () {
                         };
 
                         const onSuccess = (event) => {
+//                            console.log("Got Record:");     // FSIGAP
+//                            console.log(getRequest.result); // FSIGAP 
                             getReqObserver.next(getRequest.result);
                             getReqObserver.complete();
                         };
@@ -993,12 +1159,13 @@ window.dnetindexeddbinterop = (function () {
 
 
     function getDbModel(dbModelGuid) {
-
+        console.log(`Getting db model ${dbModelGuid}`);
         const dbModel = dbModels.find(element => element.dbModel.dbModelGuid === dbModelGuid);
 
         return dbModel;
     }
 
+    
     return {
 
         openDb: async function (indexedDbDatabaseModel) {
@@ -1013,6 +1180,42 @@ window.dnetindexeddbinterop = (function () {
             const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await deleteDb(dbModel).pipe(Rx.operators.take(1)).toPromise();
+        },
+
+        addBlobItem: async function (fields, item) {
+            // extract unmarshalled fields from struct
+            const dbModelGuid = Blazor.platform.readStringField(fields, 0);
+            const objectStoreName = Blazor.platform.readStringField(fields, 8);
+            let key = Blazor.platform.readStringField(fields, 16);
+            const mimeType = Blazor.platform.readStringField(fields, 24);
+            console.log(`Adding file with mime type ${mimeType}`);
+            if (key === "") key = null;
+            const dbModel = getDbModel(dbModelGuid).dbModel;
+
+            // create blob from array
+            const dataPtr = Blazor.platform.getArrayEntryPtr(item, 0, 4);
+            const length = Blazor.platform.getArrayLength(item);
+            var blob = new Blob([new Uint8Array(Module.HEAPU8.buffer, dataPtr, length)], { type: mimeType });
+
+            return await addBlobItem(dbModel, objectStoreName, blob, key).pipe(Rx.operators.take(1)).toPromise();
+        },
+
+        updateBlobItem: async function (fields, item) {
+            // extract unmarshalled fields from struct
+            const dbModelGuid = Blazor.platform.readStringField(fields, 0);
+            const objectStoreName = Blazor.platform.readStringField(fields, 8);
+            let key = Blazor.platform.readStringField(fields, 16);
+            const mimeType = Blazor.platform.readStringField(fields, 24);
+            console.log(`Updating file with mime type ${mimeType}`);
+            if (key === "") key = null;
+            const dbModel = getDbModel(dbModelGuid).dbModel;
+
+            // create blob from array
+            const dataPtr = Blazor.platform.getArrayEntryPtr(item, 0, 4);
+            const length = Blazor.platform.getArrayLength(item);
+            var blob = new Blob([new Uint8Array(Module.HEAPU8.buffer, dataPtr, length)], { type: mimeType });
+
+            return await updateBlobItem(dbModel, objectStoreName, blob, key).pipe(Rx.operators.take(1)).toPromise();
         },
 
         addItems: async function (indexedDbDatabaseModel, objectStoreName, items) {
@@ -1036,10 +1239,164 @@ window.dnetindexeddbinterop = (function () {
             return await updateItemsByKey(dbModel, objectStoreName, items, keys).pipe(Rx.operators.take(1)).toPromise();
         },
 
+        assignBlobToElement: async function (indexedDbDatabaseModel, objectStoreName, key, elementId, attribute) {
+            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+            const res = await getByKey(dbModel, objectStoreName, key).pipe(Rx.operators.take(1)).toPromise();
+            var el = document.getElementById(elementId);
+            var url=URL.createObjectURL(res);
+            el.setAttribute(attribute, url);
+        },
+
+        updateBlobFromElement: async function (indexedDbDatabaseModel, objectStoreName, key, elementId, attribute) {
+            var el = document.getElementById(elementId);
+            var src = el.getAttribute(attribute)
+            var blob = await fetch(src)
+                .then(res => {
+                    return res.blob();
+                });
+                //.then(blob => {
+                //    console.log(blob);
+                //    return blob;
+                //});
+            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+            await updateBlobItem(dbModel, objectStoreName, blob, key).pipe(Rx.operators.take(1)).toPromise();
+        },
+
+        // This is really slow since it has to base64 encode anything going back to blazor.
+        // You could directly reference the blob using something like this which should be faster:
+        /// var preview = document.getElementById('preview');
+        //  URL.createObjectURL(blobvar); 
+        //  preview.setAttribute('src', url);
+        //https://schibsted.com/blog/the-magic-of-createobjecturl/
+        //https://developer.mozilla.org/en-US/docs/Web/API/File/Using_files_from_web_applications#example_using_object_urls_to_display_images
+        getBlobByKey: async function (indexedDbDatabaseModel, objectStoreName, key) {
+
+            const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+            const res = await getByKey(dbModel, objectStoreName, key).pipe(Rx.operators.take(1)).toPromise();
+            const reader = new FileReader();
+            reader.readAsDataURL(res);
+            return new Promise(resolve => {
+                reader.onloadend = () => {
+                    resolve(reader.result);
+                };
+            });
+        },
+
+        //// Faster version of above by writing into .net memory buffer, only usable by .NET 5 
+        ////
+        //// See:
+        //// https://github.com/SteveSandersonMS/BlazorInputFile/blob/master/BlazorInputFile/SharedMemoryFileListEntryStream.cs
+        //// https://github.com/SteveSandersonMS/BlazorInputFile/blob/master/BlazorInputFile/wwwroot/inputfile.js
+        //// https://github.com/SteveSandersonMS/BlazorInputFile/blob/master/BlazorInputFile/FileListEntryStream.cs
+        ////
+        //// Unmarshalled invoke doesn't seem to have an async version, so return value synchronously
+        ////
+        //getBlobByKey2: function (fields) {
+        //    var bytesReturned = Blazor.platform.readInt32Field(fields, 32);
+        //    var bytesReturnedArray = Blazor.platform.toUint8Array(bytesReturned);
+
+        //    return (async () =>  {
+        //        const dbModelGuid = Blazor.platform.readStringField(fields, 0);
+        //        const objectStoreName = Blazor.platform.readStringField(fields, 8);
+        //        const key = Blazor.platform.readStringField(fields, 16);
+        //        var destination = Blazor.platform.readInt32Field(fields, 24);
+        //        var maxBytes = Blazor.platform.readInt32Field(fields, 28);
+        //        var bytesReturned = Blazor.platform.readInt32Field(fields, 32);
+        //        const dbModel = getDbModel(dbModelGuid).dbModel;
+        //        const res = await getByKey(dbModel, objectStoreName, key).pipe(Rx.operators.take(1)).toPromise();
+        //        //console.log(`got blob: ${res}`);
+        //        if (res == undefined) {
+        //            throw "Blob with key " + key +" not found";
+        //        }
+        //        else {
+        //            const reader = new FileReader();
+        //            reader.readAsArrayBuffer(res);
+        //            console.log("getBlobByKey2() returning promise");
+
+        //            //let result = await
+        //            return new Promise(resolve => {
+        //                reader.onloadend = () => {
+        //                    console.log("getBlobByKey2() load ended");
+        //                    var sourceArrayBuffer = reader.result;
+        //                    var bytesToRead = Math.min(maxBytes, sourceArrayBuffer.byteLength);
+        //                    console.log(`getBlobByKey2() bytes to read ${bytesToRead}`);
+        //                    var sourceUint8Array = new Uint8Array(sourceArrayBuffer, 0, bytesToRead);
+        //                    console.log(`Source array first three bytes=${sourceUint8Array[0]} ${sourceUint8Array[1]} ${sourceUint8Array[2]} `)
+        //                    var destinationUint8Array = Blazor.platform.toUint8Array(destination);
+        //                    destinationUint8Array.set(sourceUint8Array, 0);
+        //                    console.log(`Dest array first three bytes=${destinationUint8Array[0]} ${destinationUint8Array[1]} ${destinationUint8Array[2]} `)
+        //                    console.log(`getBlobByKey2() promise returning ${bytesToRead}`);
+        //                    var bytesReturnedArray = Blazor.platform.toUint8Array(bytesReturned);                            
+        //                    var readout = new Uint8Array(toBytesInt32(bytesToRead));
+        //                    console.log(`getBlobByKey2() readout[0] ${readout[0]}`);
+        //                    bytesReturnedArray.set(readout, 0);
+        //                    resolve(bytesToRead);
+
+        //                };
+        //            });
+        //        }
+        //    })().catch(e => {
+        //        console.error(e);
+        //        var abuf = toBytesInt32(-1);
+        //        var arr = new Uint8Array(abuf);
+        //        console.log(arr);
+        //        bytesReturnedArray.set(arr, 0);// set bytes returned to -1 on error
+        //    });
+        //},
+
+
+        //// .NET 6 compatible version of above
+        ////
+        //// See:
+        //// https://docs.microsoft.com/en-us/dotnet/core/compatibility/aspnet-core/6.0/byte-array-interop
+        ////
+        getBlobByKey3: function (indexedDbDatabaseModel, objectStoreName, key, maxBytes) {
+            return (async () => {
+                const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
+                const res = await getByKey(dbModel, objectStoreName, key).pipe(Rx.operators.take(1)).toPromise();
+                //console.log(`got blob: ${res}`);
+                if (res == undefined) {
+                    throw new BlobKeyNotFoundException(key);
+                }
+                else {
+                    const reader = new FileReader();
+                    reader.readAsArrayBuffer(res);
+                    console.log("getBlobByKey3() returning promise");
+
+                    //let result = await
+                    return new Promise(resolve => {
+                        reader.onloadend = () => {
+                            console.log("getBlobByKey3() load ended");
+                            var sourceArrayBuffer = reader.result;
+                            var bytesToRead = Math.min(maxBytes, sourceArrayBuffer.byteLength);
+                            console.log(`getBlobByKey3() bytes to read ${bytesToRead}`);
+                            var sourceUint8Array = new Uint8Array(sourceArrayBuffer, 0, bytesToRead);
+                            console.log(`Source array first three bytes=${sourceUint8Array[0]} ${sourceUint8Array[1]} ${sourceUint8Array[2]} `)
+                            resolve(sourceUint8Array);
+                        };
+                    });
+                }
+            })().catch(e => {
+                console.error(e);
+                throw(e);
+            });
+        },
+
+
+        // Faster version of above by writing into .net memory buffer. 
+        //
+        // See:
+        // https://github.com/SteveSandersonMS/BlazorInputFile/blob/master/BlazorInputFile/SharedMemoryFileListEntryStream.cs
+        // https://github.com/SteveSandersonMS/BlazorInputFile/blob/master/BlazorInputFile/wwwroot/inputfile.js
+        // https://github.com/SteveSandersonMS/BlazorInputFile/blob/master/BlazorInputFile/FileListEntryStream.cs
+        //
+        //getBlobByKey2: function (fields) {
+        //    (async () => await getBlobByKey2b(fields))();
+        //},
+
         getByKey: async function (indexedDbDatabaseModel, objectStoreName, key) {
 
             const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
-
             return await getByKey(dbModel, objectStoreName, key).pipe(Rx.operators.take(1)).toPromise();
         },
 
@@ -1083,7 +1440,21 @@ window.dnetindexeddbinterop = (function () {
             const dbModel = getDbModel(indexedDbDatabaseModel.dbModelGuid).dbModel;
 
             return await getExtent(dbModel, objectStoreName, dbIndex, extentTypes[extentType]).pipe(Rx.operators.take(1)).toPromise();
+        },
+
+        unmarshalledFunctionReturnBoolean: function (fields) {
+            const name = Blazor.platform.readStringField(fields, 0);
+            const year = Blazor.platform.readInt32Field(fields, 8);
+
+            return name === "Brigadier Alistair Gordon Lethbridge-Stewart" &&
+                year === 1968;
+        },
+        unmarshalledFunctionReturnString: function (fields) {
+            const name = Blazor.platform.readStringField(fields, 0);
+            const year = Blazor.platform.readInt32Field(fields, 8);
+            return BINDING.js_string_to_mono_string(`Hello, ${name} (${year})!`);
         }
+
 
     };
 })();

@@ -1,0 +1,46 @@
+﻿.k-upload-files, ::deep .k-upload-files {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.k-form-hint, ::deep .k-form-hint {
+    display: block;
+    margin-top: 1em;
+}
+
+.demo-section > .kd-demo-heading, ::deep .demo-section > .kd-demo-heading {
+    padding-bottom: 0;
+    margin-bottom: 1em;
+    width: 75vw;
+}
+
+.dropArea, ::deep .dropArea {
+    border: 2px dashed steelblue;
+    padding: 10px;
+    width: 75%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: lightblue;
+    font-size: 1.5rem;
+    cursor: pointer;
+    position: relative;
+    min-height: 200px;
+}
+
+    .dropArea:hover, ::deep .dropArea:hover {
+        background-color: lightskyblue;
+        color: #333;
+    }
+
+    .dropArea input[type=file], ::deep .dropArea input[type=file] {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+.dropAreaDrug, ::deep .dropAreaDrug {
+    background-color: lightseagreen;
+}
